@@ -40,29 +40,7 @@ public class Tracking {
     private static final Map<SocBot, String> ids = new HashMap<SocBot, String>();
     private static final Events events = new Events();
     
-    private static String VERSION;
-
-    static {
-        Package p = Tracking.class.getPackage();
-
-        if (p == null) {
-            p = Package.getPackage("me.entityreborn.chirc");
-        }
-
-        VERSION = "(unknown)";
-
-        if (p != null) {
-            String v = p.getImplementationVersion();
-
-            if (v != null) {
-                VERSION = v;
-            }
-        }
-    }
-
-    public static String getVersion() {
-        return VERSION;
-    }
+    private static final String VERSION = "0.0.0";
     
     @startup
     public static void startup() {
