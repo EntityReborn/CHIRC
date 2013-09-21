@@ -28,6 +28,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -45,6 +46,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import me.entityreborn.socbot.api.SocBot;
 import me.entityreborn.socbot.api.events.CTCPEvent;
+import me.entityreborn.socbot.api.events.DisconnectedEvent;
 import me.entityreborn.socbot.api.events.JoinEvent;
 import me.entityreborn.socbot.api.events.PrivmsgEvent;
 import me.entityreborn.socbot.api.events.WelcomeEvent;
@@ -56,6 +58,20 @@ import me.entityreborn.socbot.events.Listener;
  * @author Jason Unger <entityreborn@gmail.com>
  */
 public class Events implements Listener {
+    @EventHandler
+    public void handleDisconnect(DisconnectedEvent e) {
+        final Disconnected event = new Disconnected(e);
+        try {
+            StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+                public Object call() {
+                    EventUtils.TriggerListener(Driver.EXTENSION, "irc_disconnected", event);
+                    return null;
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(Events.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     
     @EventHandler
     public void handlePrivMsg(PrivmsgEvent e) {
@@ -116,6 +132,26 @@ public class Events implements Listener {
             });
         } catch (Exception ex) {
             Logger.getLogger(Events.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private static class Disconnected implements BindableEvent {
+        private final DisconnectedEvent event;
+
+        public Disconnected(DisconnectedEvent event) {
+            this.event = event;
+        }
+        
+        public Object _GetObject() {
+            return this;
+        }
+        
+        public SocBot getBot() {
+            return event.getBot();
+        }
+        
+        public boolean wasClean() {
+            return event.wasClean();
         }
     }
     
@@ -242,6 +278,27 @@ public class Events implements Listener {
     }
     
     @api
+    public static class irc_disconnected extends IrcEvent {
+
+        public String getName() {
+            return "irc_disconnected";
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            Map<String, Construct> retn = new HashMap<String, Construct>();
+            
+            if (e instanceof Disconnected) {
+                Disconnected msg = (Disconnected)e;
+                
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
+                retn.put("wasClean", new CBoolean(msg.wasClean(), Target.UNKNOWN));
+            }
+            
+            return retn;
+        }
+    }
+    
+    @api
     public static class irc_msg extends IrcEvent {
 
         public String getName() {
@@ -254,7 +311,7 @@ public class Events implements Listener {
             if (e instanceof PrivMsg) {
                 PrivMsg msg = (PrivMsg)e;
                 
-                retn.put("id", new CString(Tracking.getId(msg.getBot()), Target.UNKNOWN));
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("who", new CString(msg.getWho(), Target.UNKNOWN));
                 retn.put("target", new CString(msg.getTarget(), Target.UNKNOWN));
                 retn.put("message", new CString(msg.getMessage(), Target.UNKNOWN));
@@ -277,7 +334,7 @@ public class Events implements Listener {
             if (e instanceof Action) {
                 Action msg = (Action)e;
                 
-                retn.put("id", new CString(Tracking.getId(msg.getBot()), Target.UNKNOWN));
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("who", new CString(msg.getWho(), Target.UNKNOWN));
                 retn.put("target", new CString(msg.getTarget(), Target.UNKNOWN));
                 retn.put("message", new CString(msg.getMessage(), Target.UNKNOWN));
@@ -318,6 +375,7 @@ public class Events implements Listener {
             if (e instanceof Join) {
                 Join msg = (Join)e;
                 
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("who", new CString(msg.getWho(), Target.UNKNOWN));
                 retn.put("channel", new CString(msg.getChannel(), Target.UNKNOWN));
             }

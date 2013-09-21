@@ -37,7 +37,6 @@ import me.entityreborn.socbot.events.EventManager;
  */
 public class Tracking {
     private static final Map<String, SocBot> bots = new HashMap<String, SocBot>();
-    private static final Map<SocBot, String> ids = new HashMap<SocBot, String>();
     private static final Events events = new Events();
     
     private static final String VERSION = "0.0.0";
@@ -52,26 +51,24 @@ public class Tracking {
         System.out.println("CHIRC v." + VERSION + " stopping...");
         
         for (SocBot bot : bots.values()) {
-            bot.disconnect();
+            bot.disconnect(true);
         }
         
         bots.clear();
-        ids.clear();
         
         System.out.println("CHIRC v." + VERSION + " stopped");
     }
     
     public static SocBot create(String id) {
-        if (bots.containsKey(id)) {
+        if (bots.containsKey(id.toLowerCase())) {
             return null;
         }
         
-        SocBot bot = new Core();
+        SocBot bot = new Core(id.toLowerCase());
         
         EventManager.registerEvents(events, bot);
         
         bots.put(id.toLowerCase(), bot);
-        ids.put(bot, id.toLowerCase());
         
         return bot;
     }
@@ -80,16 +77,11 @@ public class Tracking {
         return bots.get(id.toLowerCase());
     }
     
-    public static String getId(SocBot bot) {
-        return ids.get(bot);
-    }
-    
     public static void destroy(String id) {
         SocBot bot = bots.remove(id.toLowerCase());
         
         if (bot != null) {
-            bot.disconnect();
-            ids.remove(bot);
+            bot.disconnect(true);
         }
     }
     
