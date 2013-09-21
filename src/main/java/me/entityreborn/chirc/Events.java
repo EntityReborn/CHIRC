@@ -48,6 +48,7 @@ import me.entityreborn.socbot.api.SocBot;
 import me.entityreborn.socbot.api.events.CTCPEvent;
 import me.entityreborn.socbot.api.events.DisconnectedEvent;
 import me.entityreborn.socbot.api.events.JoinEvent;
+import me.entityreborn.socbot.api.events.PartEvent;
 import me.entityreborn.socbot.api.events.PrivmsgEvent;
 import me.entityreborn.socbot.api.events.WelcomeEvent;
 import me.entityreborn.socbot.events.EventHandler;
@@ -135,6 +136,21 @@ public class Events implements Listener {
         }
     }
     
+    @EventHandler
+    public void handleParted(PartEvent e) {
+        final Part event = new Part(e);
+        try {
+            StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+                public Object call() {
+                    EventUtils.TriggerListener(Driver.EXTENSION, "irc_parted", event);
+                    return null;
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(Events.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     private static class Disconnected implements BindableEvent {
         private final DisconnectedEvent event;
 
@@ -175,6 +191,30 @@ public class Events implements Listener {
         private final JoinEvent event;
 
         public Join(JoinEvent e) {
+            event = e;
+        }
+        
+        public Object _GetObject() {
+            return this;
+        }
+        
+        public SocBot getBot() {
+            return event.getBot();
+        }
+        
+        public String getWho() {
+            return event.getUser().getName();
+        }
+        
+        public String getChannel() {
+            return event.getChannel().getName();
+        }
+    }
+    
+    private static class Part implements BindableEvent {
+        private final PartEvent event;
+
+        public Part(PartEvent e) {
             event = e;
         }
         
@@ -356,6 +396,7 @@ public class Events implements Listener {
             
             if (e instanceof Welcome) {
                 Welcome msg = (Welcome)e;
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
             }
             
             return retn;
@@ -374,6 +415,28 @@ public class Events implements Listener {
             
             if (e instanceof Join) {
                 Join msg = (Join)e;
+                
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
+                retn.put("who", new CString(msg.getWho(), Target.UNKNOWN));
+                retn.put("channel", new CString(msg.getChannel(), Target.UNKNOWN));
+            }
+            
+            return retn;
+        }
+    }
+    
+    @api
+    public static class irc_parted extends IrcEvent {
+
+        public String getName() {
+            return "irc_parted";
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            Map<String, Construct> retn = new HashMap<String, Construct>();
+            
+            if (e instanceof Part) {
+                Part msg = (Part)e;
                 
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("who", new CString(msg.getWho(), Target.UNKNOWN));
