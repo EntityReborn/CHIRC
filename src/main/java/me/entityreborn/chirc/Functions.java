@@ -28,6 +28,8 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -65,7 +67,8 @@ public class Functions {
     
     @api
     public static class irc_create extends IrcFunc {
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
             SocBot bot = Tracking.create(args[0].val());
             
             return new CBoolean(bot != null, t);
@@ -80,13 +83,15 @@ public class Functions {
         }
 
         public String docs() {
-            return "boolean {id} Create an IRC bot for later use. Returns true if that id didn't exist, and false if it did.";
+            return "boolean {id} Create an IRC bot for later use. Returns true"
+                    + " if that id didn't exist, and false if it did.";
         }
     }
     
     @api
     public static class irc_destroy extends IrcFunc {
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
             Tracking.destroy(args[0].val());
             
             return new CVoid(t);
@@ -101,7 +106,8 @@ public class Functions {
         }
 
         public String docs() {
-            return "void {id} Destroy an IRC bot. Disconnects the bot from any connection, and removes it's instance from memory.";
+            return "void {id} Destroy an IRC bot. Disconnects the bot from any"
+                    + " connection, and removes it's instance from memory.";
         }
     }
     
@@ -109,34 +115,133 @@ public class Functions {
     public static class irc_connect extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {ExceptionType.NotFoundException, ExceptionType.IOException};
+            return new ExceptionType[] {
+                ExceptionType.NotFoundException, ExceptionType.IOException, 
+                ExceptionType.CastException, ExceptionType.RangeException};
         }
         
-        public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(final Target t, Environment environment
+                , Construct... args) throws ConfigRuntimeException {
             final SocBot bot = Tracking.get(args[0].val());
+            
             if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!", ExceptionType.NotFoundException, t);
+                throw new ConfigRuntimeException("That id doesn't exist!",
+                        ExceptionType.NotFoundException, t);
             }
             
             String nick = args[1].val();
             final String host = args[2].val();
+            final int port;
+            final String password;
+            final CClosure closure;
+            boolean async = true;
+            
+            if (args.length >= 4) {
+                if (!(args[3] instanceof CArray) || 
+                        !((CArray)args[3]).inAssociativeMode()) {
+                    throw new ConfigRuntimeException(getName() + " expects an"
+                            + " associative array to be sent as the fourth argument", 
+                            ExceptionType.CastException, t);
+                }
+                
+                CArray arr = (CArray)args[3];
+                
+                if (arr.containsKey("realname")) {
+                    bot.setRealname(arr.get("realname").val());
+                }
+                
+                if (arr.containsKey("username")) {
+                    bot.setUsername(arr.get("username").val());
+                }
+                
+                if (arr.containsKey("port")) {
+                    if (!(arr.get("port") instanceof CInt)) {
+                        throw new ConfigRuntimeException(getName() + " expects an"
+                                + " integer between 1 and 65535 to be sent as port"
+                                + " in the fourth argument", ExceptionType.CastException, t);
+                    }
+                    
+                    CInt iport = (CInt)arr.get("port");
+                    
+                    if (iport.getInt() < 1 || iport.getInt() > 65535) {
+                        throw new ConfigRuntimeException(getName() + " expects an"
+                                + " integer between 1 and 65535 to be sent as port"
+                                + " in the fourth argument", ExceptionType.RangeException, t);
+                    }
+                    
+                    port = (int)iport.getInt();
+                } else {
+                    port = 6667;
+                }
+                
+                if (arr.containsKey("password")) {
+                    password = arr.get("password").val();
+                } else {
+                    password = null;
+                }
+                
+                if (arr.containsKey("exceptionhandler")) {
+                    if (!(arr.get("exceptionhandler") instanceof CClosure)) {
+                        throw new ConfigRuntimeException(getName() + " expects a"
+                                + " closure to be sent as exceptionhandler in the"
+                                + " fourth argument", ExceptionType.CastException, t);
+                    }
+                    
+                    closure = (CClosure)arr.get("exceptionhandler");
+                } else {
+                    closure = null;
+                }
+                
+                if (arr.containsKey("runsync")) {
+                    if (!(arr.get("runsync") instanceof CBoolean)) {
+                        throw new ConfigRuntimeException(getName() + " expects a"
+                                + " boolean to be sent as runsync in the fourth"
+                                + " argument", ExceptionType.CastException, t);
+                    }
+                    
+                    async = !((CBoolean)arr.get("runsync")).getBoolean();
+                }
+            } else {
+                closure = null;
+                port = 6667;
+                password = null;
+            }
             
             bot.setNickname(nick);
             
-            Thread th = new Thread() {
-
-                @Override
+            final Runnable doConnect = new Runnable() {
                 public void run() {
                     try {
-                        bot.connect(host);
+                        bot.connect(host, port, password);
                     } catch (IOException e) {
-                        throw new ConfigRuntimeException(e.getMessage(), ExceptionType.IOException, t);
+                        CArray arr = new CArray(t);
+                        
+                        arr.set("message", e.getMessage());
+                        arr.set("class", e.getClass().getSimpleName());
+                        arr.set("id", bot.getID());
+                        
+                        if (closure != null) {
+                            closure.execute(arr);
+                        } else {
+                            throw new ConfigRuntimeException(e.getMessage(),
+                                    ExceptionType.IOException, t);
+                        }
                     }
                 }
             };
             
-            th.start();
+            if (async) {
+                Thread th = new Thread() {
+                    @Override
+                    public void run() {
+                        doConnect.run();
+                    }
+                };
             
+                th.start();
+            } else {
+                doConnect.run();
+            }
             
             return new CVoid(t);
         }
@@ -158,17 +263,21 @@ public class Functions {
     public static class irc_join extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {ExceptionType.NotFoundException, ExceptionType.IOException};
+            return new ExceptionType[] {
+                ExceptionType.NotFoundException, ExceptionType.IOException};
         }
         
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
             SocBot bot = Tracking.get(args[0].val());
             if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!", ExceptionType.NotFoundException, t);
+                throw new ConfigRuntimeException("That id doesn't exist!",
+                        ExceptionType.NotFoundException, t);
             }
             
             if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!", ExceptionType.IOException, t);
+                throw new ConfigRuntimeException("This bot is not connected!",
+                        ExceptionType.IOException, t);
             }
             
             String channel = args[1].val();
@@ -199,17 +308,21 @@ public class Functions {
     public static class irc_part extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {ExceptionType.NotFoundException, ExceptionType.IOException};
+            return new ExceptionType[] {
+                ExceptionType.NotFoundException, ExceptionType.IOException};
         }
         
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
             SocBot bot = Tracking.get(args[0].val());
             if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!", ExceptionType.NotFoundException, t);
+                throw new ConfigRuntimeException("That id doesn't exist!",
+                        ExceptionType.NotFoundException, t);
             }
             
             if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!", ExceptionType.IOException, t);
+                throw new ConfigRuntimeException("This bot is not connected!",
+                        ExceptionType.IOException, t);
             }
             
             String channel = args[1].val();
@@ -240,17 +353,21 @@ public class Functions {
     public static class irc_quit extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {ExceptionType.NotFoundException, ExceptionType.IOException};
+            return new ExceptionType[] {
+                ExceptionType.NotFoundException, ExceptionType.IOException};
         }
         
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
             SocBot bot = Tracking.get(args[0].val());
             if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!", ExceptionType.NotFoundException, t);
+                throw new ConfigRuntimeException("That id doesn't exist!",
+                        ExceptionType.NotFoundException, t);
             }
             
             if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!", ExceptionType.IOException, t);
+                throw new ConfigRuntimeException("This bot is not connected!",
+                        ExceptionType.IOException, t);
             }
             
             if (args.length == 2) {
@@ -279,17 +396,21 @@ public class Functions {
     public static class irc_msg extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {ExceptionType.NotFoundException, ExceptionType.IOException};
+            return new ExceptionType[] {
+                ExceptionType.NotFoundException, ExceptionType.IOException};
         }
         
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
             SocBot bot = Tracking.get(args[0].val());
             if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!", ExceptionType.NotFoundException, t);
+                throw new ConfigRuntimeException("That id doesn't exist!",
+                        ExceptionType.NotFoundException, t);
             }
             
             if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!", ExceptionType.IOException, t);
+                throw new ConfigRuntimeException("This bot is not connected!",
+                        ExceptionType.IOException, t);
             }
             
             String channel = args[1].val();
@@ -326,17 +447,21 @@ public class Functions {
     public static class irc_action extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {ExceptionType.NotFoundException, ExceptionType.IOException};
+            return new ExceptionType[] {
+                ExceptionType.NotFoundException, ExceptionType.IOException};
         }
         
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
             SocBot bot = Tracking.get(args[0].val());
             if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!", ExceptionType.NotFoundException, t);
+                throw new ConfigRuntimeException("That id doesn't exist!",
+                        ExceptionType.NotFoundException, t);
             }
             
             if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!", ExceptionType.IOException, t);
+                throw new ConfigRuntimeException("This bot is not connected!",
+                        ExceptionType.IOException, t);
             }
             
             String channel = args[1].val();
@@ -373,17 +498,21 @@ public class Functions {
     public static class irc_nick extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {ExceptionType.NotFoundException, ExceptionType.IOException};
+            return new ExceptionType[] {
+                ExceptionType.NotFoundException, ExceptionType.IOException};
         }
         
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
             SocBot bot = Tracking.get(args[0].val());
             if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!", ExceptionType.NotFoundException, t);
+                throw new ConfigRuntimeException("That id doesn't exist!",
+                        ExceptionType.NotFoundException, t);
             }
             
             if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!", ExceptionType.IOException, t);
+                throw new ConfigRuntimeException("This bot is not connected!",
+                        ExceptionType.IOException, t);
             }
             
             String name = args[1].val();
@@ -413,10 +542,12 @@ public class Functions {
             return new ExceptionType[] {ExceptionType.NotFoundException};
         }
         
-        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
             SocBot bot = Tracking.get(args[0].val());
             if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!", ExceptionType.NotFoundException, t);
+                throw new ConfigRuntimeException("That id doesn't exist!",
+                        ExceptionType.NotFoundException, t);
             }
             
             CArray retn = new CArray(t);
