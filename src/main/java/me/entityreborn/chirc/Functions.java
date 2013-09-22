@@ -220,8 +220,10 @@ public class Functions {
                         arr.set("class", e.getClass().getSimpleName());
                         arr.set("id", bot.getID());
                         
+                        Construct[] args = new Construct[] {arr};
+                        
                         if (closure != null) {
-                            closure.execute(arr);
+                            closure.execute(args);
                         } else {
                             throw new ConfigRuntimeException(e.getMessage(),
                                     ExceptionType.IOException, t);
