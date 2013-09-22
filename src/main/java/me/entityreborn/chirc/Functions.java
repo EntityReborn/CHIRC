@@ -557,7 +557,7 @@ public class Functions {
             CArray channels = new CArray(t);
             
             for (Channel chan : bot.getChannels()) {
-                channels.push(new CString(chan.getTopic(), t));
+                channels.push(new CString(chan.getName(), t));
             }
             
             retn.set("nickname", bot.getNickname());
