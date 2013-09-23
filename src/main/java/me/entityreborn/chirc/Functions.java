@@ -24,21 +24,30 @@
 package me.entityreborn.chirc;
 
 import com.laytonsmith.PureUtilities.Version;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
-import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import me.entityreborn.chirc.Events.ConnectionException;
+import static me.entityreborn.chirc.Tracking.verbose;
+import static me.entityreborn.chirc.Tracking.flatten;
 import me.entityreborn.socbot.api.Channel;
 import me.entityreborn.socbot.api.SocBot;
 
@@ -69,6 +78,8 @@ public class Functions {
     public static class irc_create extends IrcFunc {
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
+            verbose("irc_create:" + flatten(args), t);
+            
             SocBot bot = Tracking.create(args[0].val());
             
             return new CBoolean(bot != null, t);
@@ -92,6 +103,8 @@ public class Functions {
     public static class irc_destroy extends IrcFunc {
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
+            verbose("irc_destroy:" + flatten(args), t);
+            
             Tracking.destroy(args[0].val());
             
             return new CVoid(t);
@@ -122,6 +135,8 @@ public class Functions {
         
         public Construct exec(final Target t, Environment environment
                 , Construct... args) throws ConfigRuntimeException {
+            verbose("irc_connect:" + flatten(args), t);
+            
             final SocBot bot = Tracking.get(args[0].val());
             
             if (bot == null) {
@@ -133,7 +148,6 @@ public class Functions {
             final String host = args[2].val();
             final int port;
             final String password;
-            final CClosure closure;
             boolean async = true;
             
             if (args.length >= 4) {
@@ -155,21 +169,15 @@ public class Functions {
                 }
                 
                 if (arr.containsKey("port")) {
-                    if (!(arr.get("port") instanceof CInt)) {
-                        throw new ConfigRuntimeException(getName() + " expects an"
-                                + " integer between 1 and 65535 to be sent as port"
-                                + " in the fourth argument", ExceptionType.CastException, t);
-                    }
+                    long iport = Static.getInt(arr.get("port"), t);
                     
-                    CInt iport = (CInt)arr.get("port");
-                    
-                    if (iport.getInt() < 1 || iport.getInt() > 65535) {
+                    if (iport < 1 || iport > 65535) {
                         throw new ConfigRuntimeException(getName() + " expects an"
                                 + " integer between 1 and 65535 to be sent as port"
                                 + " in the fourth argument", ExceptionType.RangeException, t);
                     }
                     
-                    port = (int)iport.getInt();
+                    port = (int)iport;
                 } else {
                     port = 6667;
                 }
@@ -178,18 +186,6 @@ public class Functions {
                     password = arr.get("password").val();
                 } else {
                     password = null;
-                }
-                
-                if (arr.containsKey("exceptionhandler")) {
-                    if (!(arr.get("exceptionhandler") instanceof CClosure)) {
-                        throw new ConfigRuntimeException(getName() + " expects a"
-                                + " closure to be sent as exceptionhandler in the"
-                                + " fourth argument", ExceptionType.CastException, t);
-                    }
-                    
-                    closure = (CClosure)arr.get("exceptionhandler");
-                } else {
-                    closure = null;
                 }
                 
                 if (arr.containsKey("runsync")) {
@@ -202,7 +198,6 @@ public class Functions {
                     async = !((CBoolean)arr.get("runsync")).getBoolean();
                 }
             } else {
-                closure = null;
                 port = 6667;
                 password = null;
             }
@@ -214,19 +209,17 @@ public class Functions {
                     try {
                         bot.connect(host, port, password);
                     } catch (IOException e) {
-                        CArray arr = new CArray(t);
+                        final ConnectionException event = new ConnectionException(e, bot);
                         
-                        arr.set("message", e.getMessage());
-                        arr.set("class", e.getClass().getSimpleName());
-                        arr.set("id", bot.getID());
-                        
-                        Construct[] args = new Construct[] {arr};
-                        
-                        if (closure != null) {
-                            closure.execute(args);
-                        } else {
-                            throw new ConfigRuntimeException(e.getMessage(),
-                                    ExceptionType.IOException, t);
+                        try {
+                            StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+                                public Object call() {
+                                    EventUtils.TriggerListener(Driver.EXTENSION, "irc_connection_exception", event);
+                                    return null;
+                                }
+                            });
+                        } catch (Exception ex) {
+                            Logger.getLogger(Events.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 }
@@ -271,7 +264,10 @@ public class Functions {
         
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
+            verbose("irc_join:" + flatten(args), t);
+            
             SocBot bot = Tracking.get(args[0].val());
+            
             if (bot == null) {
                 throw new ConfigRuntimeException("That id doesn't exist!",
                         ExceptionType.NotFoundException, t);
@@ -316,7 +312,10 @@ public class Functions {
         
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
+            verbose("irc_part:" + flatten(args), t);
+            
             SocBot bot = Tracking.get(args[0].val());
+            
             if (bot == null) {
                 throw new ConfigRuntimeException("That id doesn't exist!",
                         ExceptionType.NotFoundException, t);
@@ -361,7 +360,10 @@ public class Functions {
         
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
+            verbose("irc_quit:" + flatten(args), t);
+            
             SocBot bot = Tracking.get(args[0].val());
+            
             if (bot == null) {
                 throw new ConfigRuntimeException("That id doesn't exist!",
                         ExceptionType.NotFoundException, t);
@@ -404,7 +406,10 @@ public class Functions {
         
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
+            verbose("irc_msg:" + flatten(args), t);
+            
             SocBot bot = Tracking.get(args[0].val());
+            
             if (bot == null) {
                 throw new ConfigRuntimeException("That id doesn't exist!",
                         ExceptionType.NotFoundException, t);
@@ -455,7 +460,10 @@ public class Functions {
         
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
+            verbose("irc_action:" + flatten(args), t);
+            
             SocBot bot = Tracking.get(args[0].val());
+            
             if (bot == null) {
                 throw new ConfigRuntimeException("That id doesn't exist!",
                         ExceptionType.NotFoundException, t);
@@ -506,7 +514,10 @@ public class Functions {
         
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
+            verbose("irc_nick:" + flatten(args), t);
+            
             SocBot bot = Tracking.get(args[0].val());
+            
             if (bot == null) {
                 throw new ConfigRuntimeException("That id doesn't exist!",
                         ExceptionType.NotFoundException, t);
@@ -546,7 +557,10 @@ public class Functions {
         
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
+            verbose("irc_info:" + flatten(args), t);
+            
             SocBot bot = Tracking.get(args[0].val());
+            
             if (bot == null) {
                 throw new ConfigRuntimeException("That id doesn't exist!",
                         ExceptionType.NotFoundException, t);

@@ -25,8 +25,15 @@ package me.entityreborn.chirc;
 
 import com.laytonsmith.annotations.shutdown;
 import com.laytonsmith.annotations.startup;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import me.entityreborn.socbot.api.SocBot;
 import me.entityreborn.socbot.core.Core;
 import me.entityreborn.socbot.events.EventManager;
@@ -43,12 +50,12 @@ public class Tracking {
     
     @startup
     public static void startup() {
-        System.out.println("CHIRC v." + VERSION + " loaded.");
+        log("CHIRC v." + VERSION + " loaded.", Target.UNKNOWN);
     }
     
     @shutdown
     public static void shutdown() {
-        System.out.println("CHIRC v." + VERSION + " stopping...");
+        log("CHIRC v." + VERSION + " stopping...", Target.UNKNOWN);
         
         for (SocBot bot : bots.values()) {
             bot.disconnect(true);
@@ -56,13 +63,37 @@ public class Tracking {
         
         bots.clear();
         
-        System.out.println("CHIRC v." + VERSION + " stopped");
+        log("CHIRC v." + VERSION + " stopped", Target.UNKNOWN);
+    }
+    
+    public static void log(String line, Target targ) {
+        CHLog.GetLogger().i(CHLog.Tags.EXTENSIONS, "[CHIRC] " + line, targ);
+    }
+    
+    public static void verbose(String line, Target targ) {
+        CHLog.GetLogger().v(CHLog.Tags.EXTENSIONS, "[CHIRC] " + line, targ);
+    }
+    
+    public static String flatten(Construct... args) {
+        String retn = "";
+        
+        for (int i = 0; i < args.length; i++) {
+            retn += args[i].val();
+            
+            if (i != args.length - 1) {
+                retn += ", ";
+            }
+        }
+        
+        return retn;
     }
     
     public static SocBot create(String id) {
         if (bots.containsKey(id.toLowerCase())) {
             return null;
         }
+        
+        log("Creating irc bot with id " + id, Target.UNKNOWN);
         
         SocBot bot = new Core(id.toLowerCase());
         
@@ -81,11 +112,9 @@ public class Tracking {
         SocBot bot = bots.remove(id.toLowerCase());
         
         if (bot != null) {
+            log("Destroying bot with id " + id, Target.UNKNOWN);
+            
             bot.disconnect(true);
         }
-    }
-    
-    public static void main(String[] strings) {
-        System.out.println(VERSION);
     }
 }

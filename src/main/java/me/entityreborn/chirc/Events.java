@@ -39,6 +39,7 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -168,6 +169,32 @@ public class Events implements Listener {
         
         public boolean wasClean() {
             return event.wasClean();
+        }
+    }
+    
+    protected static class ConnectionException implements BindableEvent {
+        private final IOException exception;
+        private final SocBot bot;
+
+        public ConnectionException(IOException e, SocBot b) {
+            exception = e;
+            bot = b;
+        }
+        
+        public Object _GetObject() {
+            return this;
+        }
+        
+        public SocBot getBot() {
+            return bot;
+        }
+        
+        public String className() {
+            return exception.getClass().getSimpleName();
+        }
+        
+        public String getMessage() {
+            return exception.getMessage();
         }
     }
     
@@ -332,6 +359,28 @@ public class Events implements Listener {
                 
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("wasClean", new CBoolean(msg.wasClean(), Target.UNKNOWN));
+            }
+            
+            return retn;
+        }
+    }
+    
+    @api
+    public static class irc_connection_exception extends IrcEvent {
+
+        public String getName() {
+            return "irc_connection_exception";
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            Map<String, Construct> retn = new HashMap<String, Construct>();
+            
+            if (e instanceof ConnectionException) {
+                ConnectionException msg = (ConnectionException)e;
+                
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
+                retn.put("message", new CBoolean(msg.getMessage(), Target.UNKNOWN));
+                retn.put("exceptionclass", new CString(msg.className(), Target.UNKNOWN));
             }
             
             return retn;
