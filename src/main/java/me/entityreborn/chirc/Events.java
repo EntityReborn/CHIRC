@@ -29,6 +29,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -47,6 +48,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import me.entityreborn.socbot.api.SocBot;
 import me.entityreborn.socbot.api.events.CTCPEvent;
+import me.entityreborn.socbot.api.events.ConnectedEvent;
 import me.entityreborn.socbot.api.events.DisconnectedEvent;
 import me.entityreborn.socbot.api.events.JoinEvent;
 import me.entityreborn.socbot.api.events.PartEvent;
@@ -67,6 +69,21 @@ public class Events implements Listener {
             StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
                 public Object call() {
                     EventUtils.TriggerListener(Driver.EXTENSION, "irc_disconnected", event);
+                    return null;
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(Events.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @EventHandler
+    public void handleConnect(ConnectedEvent e) {
+        final Connected event = new Connected(e);
+        try {
+            StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+                public Object call() {
+                    EventUtils.TriggerListener(Driver.EXTENSION, "irc_connected", event);
                     return null;
                 }
             });
@@ -169,6 +186,30 @@ public class Events implements Listener {
         
         public boolean wasClean() {
             return event.wasClean();
+        }
+    }
+    
+    private static class Connected implements BindableEvent {
+        private final ConnectedEvent event;
+
+        public Connected(ConnectedEvent event) {
+            this.event = event;
+        }
+        
+        public Object _GetObject() {
+            return this;
+        }
+        
+        public SocBot getBot() {
+            return event.getBot();
+        }
+        
+        public String getServer() {
+            return event.getServer();
+        }
+        
+        public int getPort() {
+            return event.getPort();
         }
     }
     
@@ -346,7 +387,6 @@ public class Events implements Listener {
     
     @api
     public static class irc_disconnected extends IrcEvent {
-
         public String getName() {
             return "irc_disconnected";
         }
@@ -366,8 +406,28 @@ public class Events implements Listener {
     }
     
     @api
-    public static class irc_connection_exception extends IrcEvent {
+    public static class irc_connected extends IrcEvent {
+        public String getName() {
+            return "irc_connected";
+        }
 
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            Map<String, Construct> retn = new HashMap<String, Construct>();
+            
+            if (e instanceof Connected) {
+                Connected msg = (Connected)e;
+                
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
+                retn.put("server", new CString(msg.getServer(), Target.UNKNOWN));
+                retn.put("port", new CInt(msg.getPort(), Target.UNKNOWN));
+            }
+            
+            return retn;
+        }
+    }
+    
+    @api
+    public static class irc_connection_exception extends IrcEvent {
         public String getName() {
             return "irc_connection_exception";
         }
@@ -389,7 +449,6 @@ public class Events implements Listener {
     
     @api
     public static class irc_msg extends IrcEvent {
-
         public String getName() {
             return "irc_msg";
         }
@@ -412,7 +471,6 @@ public class Events implements Listener {
     
     @api
     public static class irc_action extends IrcEvent {
-
         public String getName() {
             return "irc_action";
         }
@@ -435,7 +493,6 @@ public class Events implements Listener {
     
     @api
     public static class irc_welcomed extends IrcEvent {
-
         public String getName() {
             return "irc_welcomed";
         }
@@ -454,7 +511,6 @@ public class Events implements Listener {
     
     @api
     public static class irc_joined extends IrcEvent {
-
         public String getName() {
             return "irc_joined";
         }
@@ -476,7 +532,6 @@ public class Events implements Listener {
     
     @api
     public static class irc_parted extends IrcEvent {
-
         public String getName() {
             return "irc_parted";
         }
