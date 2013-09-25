@@ -52,6 +52,7 @@ import me.entityreborn.socbot.api.events.CTCPEvent;
 import me.entityreborn.socbot.api.events.ConnectedEvent;
 import me.entityreborn.socbot.api.events.DisconnectedEvent;
 import me.entityreborn.socbot.api.events.JoinEvent;
+import me.entityreborn.socbot.api.events.NickEvent;
 import me.entityreborn.socbot.api.events.PacketReceivedEvent;
 import me.entityreborn.socbot.api.events.PartEvent;
 import me.entityreborn.socbot.api.events.PrivmsgEvent;
@@ -72,6 +73,21 @@ public class Events implements Listener {
             StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
                 public Object call() {
                     EventUtils.TriggerListener(Driver.EXTENSION, "irc_disconnected", event);
+                    return null;
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(Events.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @EventHandler
+    public void handleNick(NickEvent e) {
+        final Nick event = new Nick(e);
+        try {
+            StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+                public Object call() {
+                    EventUtils.TriggerListener(Driver.EXTENSION, "irc_nick_changed", event);
                     return null;
                 }
             });
@@ -243,7 +259,33 @@ public class Events implements Listener {
         }
         
         public int getPort() {
+      
+            
             return event.getPort();
+        }
+    }
+    
+    private static class Nick implements BindableEvent {
+        private final NickEvent event;
+
+        public Nick(NickEvent event) {
+            this.event = event;
+        }
+        
+        public Object _GetObject() {
+            return this;
+        }
+        
+        public SocBot getBot() {
+            return event.getBot();
+        }
+        
+        public String getOld() {
+            return event.getOldNick();
+        }
+        
+        public String getNew() {
+            return event.getNewNick();
         }
     }
     
@@ -478,6 +520,27 @@ public class Events implements Listener {
                 
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("wasClean", new CBoolean(msg.wasClean(), Target.UNKNOWN));
+            }
+            
+            return retn;
+        }
+    }
+    
+    @api
+    public static class irc_nick extends IrcEvent {
+        public String getName() {
+            return "irc_nick_changed";
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            Map<String, Construct> retn = new HashMap<String, Construct>();
+            
+            if (e instanceof Nick) {
+                Nick msg = (Nick)e;
+                
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
+                retn.put("oldnick", new CBoolean(msg.getOld(), Target.UNKNOWN));
+                retn.put("newnick", new CBoolean(msg.getNew(), Target.UNKNOWN));
             }
             
             return retn;
