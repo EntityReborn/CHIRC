@@ -55,6 +55,7 @@ import me.entityreborn.socbot.api.events.JoinEvent;
 import me.entityreborn.socbot.api.events.PacketReceivedEvent;
 import me.entityreborn.socbot.api.events.PartEvent;
 import me.entityreborn.socbot.api.events.PrivmsgEvent;
+import me.entityreborn.socbot.api.events.QuitEvent;
 import me.entityreborn.socbot.api.events.WelcomeEvent;
 import me.entityreborn.socbot.events.EventHandler;
 import me.entityreborn.socbot.events.Listener;
@@ -164,6 +165,21 @@ public class Events implements Listener {
             StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
                 public Object call() {
                     EventUtils.TriggerListener(Driver.EXTENSION, "irc_joined", event);
+                    return null;
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(Events.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @EventHandler
+    public void handleQuit(QuitEvent e) {
+        final Quit event = new Quit(e);
+        try {
+            StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+                public Object call() {
+                    EventUtils.TriggerListener(Driver.EXTENSION, "irc_quit", event);
                     return null;
                 }
             });
@@ -294,6 +310,30 @@ public class Events implements Listener {
         
         public String getChannel() {
             return event.getChannel().getName();
+        }
+    }
+    
+    private static class Quit implements BindableEvent {
+        private final QuitEvent event;
+
+        public Quit(QuitEvent e) {
+            event = e;
+        }
+        
+        public Object _GetObject() {
+            return this;
+        }
+        
+        public SocBot getBot() {
+            return event.getBot();
+        }
+        
+        public String getWho() {
+            return event.getUser().getName();
+        }
+        
+        public String getQuitMessage() {
+            return event.getQuitMessage();
         }
     }
     
@@ -583,6 +623,27 @@ public class Events implements Listener {
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("who", new CString(msg.getWho(), Target.UNKNOWN));
                 retn.put("channel", new CString(msg.getChannel(), Target.UNKNOWN));
+            }
+            
+            return retn;
+        }
+    }
+    
+    @api
+    public static class irc_quit extends IrcEvent {
+        public String getName() {
+            return "irc_quit";
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            Map<String, Construct> retn = new HashMap<String, Construct>();
+            
+            if (e instanceof Quit) {
+                Quit msg = (Quit)e;
+                
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
+                retn.put("who", new CString(msg.getWho(), Target.UNKNOWN));
+                retn.put("message", new CString(msg.getQuitMessage(), Target.UNKNOWN));
             }
             
             return retn;
