@@ -46,11 +46,13 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import me.entityreborn.socbot.api.Packet;
 import me.entityreborn.socbot.api.SocBot;
 import me.entityreborn.socbot.api.events.CTCPEvent;
 import me.entityreborn.socbot.api.events.ConnectedEvent;
 import me.entityreborn.socbot.api.events.DisconnectedEvent;
 import me.entityreborn.socbot.api.events.JoinEvent;
+import me.entityreborn.socbot.api.events.PacketReceivedEvent;
 import me.entityreborn.socbot.api.events.PartEvent;
 import me.entityreborn.socbot.api.events.PrivmsgEvent;
 import me.entityreborn.socbot.api.events.WelcomeEvent;
@@ -76,6 +78,22 @@ public class Events implements Listener {
             Logger.getLogger(Events.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    @EventHandler
+    public void handlePacketRecv(PacketReceivedEvent e) {
+        final RecvLine event = new RecvLine(e);
+        try {
+            StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+                public Object call() {
+                    EventUtils.TriggerListener(Driver.EXTENSION, "irc_recv_raw", event);
+                    return null;
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(Events.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     
     @EventHandler
     public void handleConnect(ConnectedEvent e) {
@@ -279,6 +297,27 @@ public class Events implements Listener {
         }
     }
     
+    private static class RecvLine implements BindableEvent {
+        private final PacketReceivedEvent event;
+
+        public RecvLine(PacketReceivedEvent e) {
+            event = e;
+        }
+        
+        public Object _GetObject() {
+            return this;
+        }
+        
+        public SocBot getBot() {
+            return event.getBot();
+        }
+        
+        public Packet getPacket() {
+            return event.getPacket();
+        }
+    }
+    
+    
     private static class Part implements BindableEvent {
         private final PartEvent event;
 
@@ -463,6 +502,26 @@ public class Events implements Listener {
                 retn.put("who", new CString(msg.getWho(), Target.UNKNOWN));
                 retn.put("target", new CString(msg.getTarget(), Target.UNKNOWN));
                 retn.put("message", new CString(msg.getMessage(), Target.UNKNOWN));
+            }
+            
+            return retn;
+        }
+    }
+    
+    @api
+    public static class irc_recv_raw extends IrcEvent {
+        public String getName() {
+            return "irc_recv_raw";
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            Map<String, Construct> retn = new HashMap<String, Construct>();
+            
+            if (e instanceof RecvLine) {
+                RecvLine msg = (RecvLine)e;
+                
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
+                retn.put("line", new CString(msg.getPacket().getOriginalLine(), Target.UNKNOWN));
             }
             
             return retn;
