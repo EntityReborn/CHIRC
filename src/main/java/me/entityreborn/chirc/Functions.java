@@ -30,7 +30,6 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -96,6 +95,39 @@ public class Functions {
         public String docs() {
             return "boolean {id} Create an IRC bot for later use. Returns true"
                     + " if that id didn't exist, and false if it did.";
+        }
+    }
+    
+    @api
+    public static class irc_send_raw extends IrcFunc {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("irc_send_raw:" + flatten(args), t);
+            
+            final SocBot bot = Tracking.get(args[0].val());
+            
+            if (bot == null) {
+                throw new ConfigRuntimeException("That id doesn't exist!",
+                        ExceptionType.NotFoundException, t);
+            }
+            
+            String line = args[1].val();
+            
+            bot.sendLine(line);
+            
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "irc_send_raw";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[] {2};
+        }
+
+        public String docs() {
+            return "void {id, line} Send a raw IRC line. Consult the IRC RFC for details.";
         }
     }
     
