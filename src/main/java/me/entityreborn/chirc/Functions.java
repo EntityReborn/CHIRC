@@ -41,6 +41,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,6 +50,7 @@ import static me.entityreborn.chirc.Tracking.verbose;
 import static me.entityreborn.chirc.Tracking.flatten;
 import me.entityreborn.socbot.api.Channel;
 import me.entityreborn.socbot.api.SocBot;
+import me.entityreborn.socbot.api.User;
 
 /**
  *
@@ -507,6 +509,105 @@ public class Functions {
 
         public String docs() {
             return "void {id, newnick} Try for a new nickname.";
+        }
+    }
+    
+    @api
+    public static class irc_channel_info extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[] {
+                ExceptionType.NotFoundException, ExceptionType.IOException};
+        }
+        
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("irc_nick:" + flatten(args), t);
+            
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
+            
+            String chanName = args[1].val();
+            Channel chan = bot.getChannel(chanName);
+            
+            if (chan == null) {
+                throw new ConfigRuntimeException("Not joined to that channel!",
+                    ExceptionType.NotFoundException, t);
+            }
+            
+            CArray retn = new CArray(t);
+            
+            retn.set("name", chan.getName());
+            retn.set("modes", chan.getModes());
+            retn.set("topic", chan.getTopic());
+            
+            CArray users = new CArray(t);
+            
+            for (Entry<User, String> entry : chan.getUserModes().entrySet()) {
+                CArray data = new CArray(t);
+                data.set("modes", entry.getValue());
+                
+                users.set(entry.getKey().getName(), data, t);
+            }
+            
+            retn.set("users", users, t);
+            
+            return retn;
+        }
+
+        public String getName() {
+            return "irc_channel_info";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[] {2};
+        }
+
+        public String docs() {
+            return "void {id, channel} Get info on a specific channel.";
+        }
+    }
+    
+    @api
+    public static class irc_user_info extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[] {
+                ExceptionType.NotFoundException, ExceptionType.IOException};
+        }
+        
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("irc_nick:" + flatten(args), t);
+            
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
+            
+            String userName = args[1].val();
+            User user = bot.getUser(userName);
+            
+            if (user == null) {
+                throw new ConfigRuntimeException("No idea who that is!",
+                    ExceptionType.NotFoundException, t);
+            }
+            
+            CArray retn = new CArray(t);
+            
+            retn.set("name", user.getName());
+            retn.set("modes", user.getModes());
+            retn.set("hostmask", user.getHostmask());
+            
+            return retn;
+        }
+
+        public String getName() {
+            return "irc_user_info";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[] {2};
+        }
+
+        public String docs() {
+            return "void {id, user} Get info on a specific user.";
         }
     }
     
