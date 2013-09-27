@@ -104,12 +104,7 @@ public class Functions {
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_send_raw:" + flatten(args), t);
             
-            final SocBot bot = Tracking.get(args[0].val());
-            
-            if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!",
-                        ExceptionType.NotFoundException, t);
-            }
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
             
             String line = args[1].val();
             
@@ -137,7 +132,7 @@ public class Functions {
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_destroy:" + flatten(args), t);
             
-            Tracking.destroy(args[0].val());
+            Tracking.destroy(args[0].val(), t);
             
             return new CVoid(t);
         }
@@ -169,12 +164,7 @@ public class Functions {
                 , Construct... args) throws ConfigRuntimeException {
             verbose("irc_connect:" + flatten(args), t);
             
-            final SocBot bot = Tracking.get(args[0].val());
-            
-            if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!",
-                        ExceptionType.NotFoundException, t);
-            }
+            final SocBot bot = Tracking.get(args[0].val(), t);
             
             String nick = args[1].val();
             final String host = args[2].val();
@@ -298,17 +288,7 @@ public class Functions {
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_join:" + flatten(args), t);
             
-            SocBot bot = Tracking.get(args[0].val());
-            
-            if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!",
-                        ExceptionType.NotFoundException, t);
-            }
-            
-            if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!",
-                        ExceptionType.IOException, t);
-            }
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
             
             String channel = args[1].val();
             
@@ -346,17 +326,7 @@ public class Functions {
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_part:" + flatten(args), t);
             
-            SocBot bot = Tracking.get(args[0].val());
-            
-            if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!",
-                        ExceptionType.NotFoundException, t);
-            }
-            
-            if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!",
-                        ExceptionType.IOException, t);
-            }
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
             
             String channel = args[1].val();
             
@@ -394,17 +364,7 @@ public class Functions {
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_quit:" + flatten(args), t);
             
-            SocBot bot = Tracking.get(args[0].val());
-            
-            if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!",
-                        ExceptionType.NotFoundException, t);
-            }
-            
-            if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!",
-                        ExceptionType.IOException, t);
-            }
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
             
             if (args.length == 2) {
                 bot.quit(args[1].val());
@@ -440,17 +400,7 @@ public class Functions {
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_msg:" + flatten(args), t);
             
-            SocBot bot = Tracking.get(args[0].val());
-            
-            if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!",
-                        ExceptionType.NotFoundException, t);
-            }
-            
-            if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!",
-                        ExceptionType.IOException, t);
-            }
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
             
             String channel = args[1].val();
             String message = args[2].val();
@@ -494,17 +444,7 @@ public class Functions {
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_action:" + flatten(args), t);
             
-            SocBot bot = Tracking.get(args[0].val());
-            
-            if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!",
-                        ExceptionType.NotFoundException, t);
-            }
-            
-            if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!",
-                        ExceptionType.IOException, t);
-            }
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
             
             String channel = args[1].val();
             String message = args[2].val();
@@ -548,17 +488,7 @@ public class Functions {
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_nick:" + flatten(args), t);
             
-            SocBot bot = Tracking.get(args[0].val());
-            
-            if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!",
-                        ExceptionType.NotFoundException, t);
-            }
-            
-            if (!bot.isConnected()) {
-                throw new ConfigRuntimeException("This bot is not connected!",
-                        ExceptionType.IOException, t);
-            }
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
             
             String name = args[1].val();
             
@@ -591,12 +521,7 @@ public class Functions {
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_info:" + flatten(args), t);
             
-            SocBot bot = Tracking.get(args[0].val());
-            
-            if (bot == null) {
-                throw new ConfigRuntimeException("That id doesn't exist!",
-                        ExceptionType.NotFoundException, t);
-            }
+            SocBot bot = Tracking.get(args[0].val(), t);
             
             CArray retn = new CArray(t);
             

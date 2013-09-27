@@ -30,6 +30,9 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -104,17 +107,38 @@ public class Tracking {
         return bot;
     }
     
-    public static SocBot get(String id) {
-        return bots.get(id.toLowerCase());
+    public static SocBot get(String id, Target t) {
+        SocBot bot = bots.get(id.toLowerCase());
+        
+        if (bot == null) {
+            throw new ConfigRuntimeException("That id doesn't exist!",
+                    ExceptionType.NotFoundException, t);
+        }
+        
+        return bot;
     }
     
-    public static void destroy(String id) {
+    public static SocBot getConnected(String id, Target t) {
+        SocBot bot = get(id, t);
+        
+        if (!bot.isConnected()) {
+            throw new ConfigRuntimeException("This bot is not connected!",
+                        ExceptionType.IOException, t);
+        }
+        
+        return bot;
+    }
+    
+    public static void destroy(String id, Target t) {
         SocBot bot = bots.remove(id.toLowerCase());
         
         if (bot != null) {
             log("Destroying bot with id " + id, Target.UNKNOWN);
             
             bot.disconnect(true);
+        } else {
+            throw new ConfigRuntimeException("That id doesn't exist!",
+                    ExceptionType.NotFoundException, t);
         }
     }
 }
