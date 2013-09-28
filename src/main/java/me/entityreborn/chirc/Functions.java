@@ -49,7 +49,9 @@ import me.entityreborn.chirc.Events.ConnectionException;
 import static me.entityreborn.chirc.Tracking.verbose;
 import static me.entityreborn.chirc.Tracking.flatten;
 import me.entityreborn.socbot.api.Channel;
+import me.entityreborn.socbot.api.Colors;
 import me.entityreborn.socbot.api.SocBot;
+import me.entityreborn.socbot.api.Styles;
 import me.entityreborn.socbot.api.User;
 
 /**
@@ -649,6 +651,87 @@ public class Functions {
 
         public String docs() {
             return "void {id} Get information about a specific irc connection.";
+        }
+    }
+    
+    @api
+    public static class irc_color extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[] {ExceptionType.FormatException};
+        }
+        
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("irc_color:" + flatten(args), t);
+            
+            String name = args[0].val().toUpperCase();
+            Colors color;
+            
+            try {
+                color = Colors.valueOf(name);
+            } catch(IllegalArgumentException e) {
+                throw new ConfigRuntimeException("Bad foreground color name", ExceptionType.FormatException, t);
+            }
+            
+            if (args.length == 2) {
+                try {
+                    String background = args[1].val();
+                    
+                    color.setBackground(background);
+                } catch(IllegalArgumentException e) {
+                    throw new ConfigRuntimeException("Bad background color name", ExceptionType.FormatException, t);
+                }
+            }
+            
+            return new CString(color.toString(), t);
+        }
+
+        public String getName() {
+            return "irc_color";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[] {1, 2};
+        }
+
+        public String docs() {
+            return "void {color[, background]} Return a colorcode for use in IRC messages.";
+        }
+    }
+    
+    @api
+    public static class irc_style extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[] {ExceptionType.FormatException};
+        }
+        
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("irc_style:" + flatten(args), t);
+            
+            String name = args[0].val();
+            Styles style;
+            try {
+                style = Styles.valueOf(name);
+            } catch(IllegalArgumentException e) {
+                throw new ConfigRuntimeException("Bad style name", ExceptionType.FormatException, t);
+            }
+            
+            return new CString(style.toString(), t);
+        }
+
+        public String getName() {
+            return "irc_style";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[] {1};
+        }
+
+        public String docs() {
+            return "void {style} Return a style for use in IRC messages.";
         }
     }
 }
