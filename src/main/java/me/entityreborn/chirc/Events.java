@@ -51,6 +51,7 @@ import me.entityreborn.socbot.api.SocBot;
 import me.entityreborn.socbot.api.events.CTCPEvent;
 import me.entityreborn.socbot.api.events.ConnectedEvent;
 import me.entityreborn.socbot.api.events.DisconnectedEvent;
+import me.entityreborn.socbot.api.events.ErrorEvent;
 import me.entityreborn.socbot.api.events.JoinEvent;
 import me.entityreborn.socbot.api.events.NickEvent;
 import me.entityreborn.socbot.api.events.PacketReceivedEvent;
@@ -73,6 +74,21 @@ public class Events implements Listener {
             StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
                 public Object call() {
                     EventUtils.TriggerListener(Driver.EXTENSION, "irc_disconnected", event);
+                    return null;
+                }
+            });
+        } catch (Exception ex) {
+            Logger.getLogger(Events.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @EventHandler
+    public void handleError(ErrorEvent e) {
+        final Error event = new Error(e);
+        try {
+            StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
+                public Object call() {
+                    EventUtils.TriggerListener(Driver.EXTENSION, "irc_error", event);
                     return null;
                 }
             });
@@ -219,6 +235,26 @@ public class Events implements Listener {
         }
     }
     
+    private static class Error implements BindableEvent {
+        private final ErrorEvent event;
+        
+        public Object _GetObject() {
+            return this;
+        }
+        
+        public Error(ErrorEvent evt) {
+            event = evt;
+        }
+        
+        public SocBot getBot() {
+            return event.getBot();
+        }
+        
+        public String getMessage() {
+            return event.getMessage();
+        }
+    }
+    
     private static class Disconnected implements BindableEvent {
         private final DisconnectedEvent event;
 
@@ -259,8 +295,6 @@ public class Events implements Listener {
         }
         
         public int getPort() {
-      
-            
             return event.getPort();
         }
     }
@@ -604,6 +638,26 @@ public class Events implements Listener {
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("who", new CString(msg.getWho(), Target.UNKNOWN));
                 retn.put("target", new CString(msg.getTarget(), Target.UNKNOWN));
+                retn.put("message", new CString(msg.getMessage(), Target.UNKNOWN));
+            }
+            
+            return retn;
+        }
+    }
+    
+    @api
+    public static class irc_error extends IrcEvent {
+        public String getName() {
+            return "irc_error";
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            Map<String, Construct> retn = new HashMap<String, Construct>();
+            
+            if (e instanceof Error) {
+                Error msg = (Error)e;
+                
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("message", new CString(msg.getMessage(), Target.UNKNOWN));
             }
             
