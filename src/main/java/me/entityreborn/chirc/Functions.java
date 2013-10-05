@@ -23,6 +23,7 @@
  */
 package me.entityreborn.chirc;
 
+import android.graphics.Color;
 import com.entityreborn.socbot.Channel;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -727,6 +728,8 @@ public class Functions {
         }
     }
     
+    
+    
     @api
     public static class irc_style extends IrcFunc {
         @Override
@@ -761,6 +764,106 @@ public class Functions {
             return "void {style} Return a style for use in IRC messages. Values: "
                     + StringUtils.Join(Styles.values(), ", ") + ". ITALIC and "
                     + "STRIKETHRU don't work on all clients.";
+        }
+    }
+    
+    @api
+    public static class irc_mc2irc_colors extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[] {};
+        }
+        
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("irc_mc2irc_colors:" + flatten(args), t);
+            
+            String line = args[0].val();
+            
+            line = line.replaceAll("§0", "\u00030");
+            line = line.replaceAll("§1", "\u00032");
+            line = line.replaceAll("§2", "\u00033");
+            line = line.replaceAll("§3", "\u000310");
+            line = line.replaceAll("§4", "\u00035");
+            line = line.replaceAll("§5", "\u00036");
+            line = line.replaceAll("§6", "\u00037");
+            line = line.replaceAll("§7", "\u000315");
+            line = line.replaceAll("§8", "\u000314");
+            line = line.replaceAll("§9", "\u000312");
+            line = line.replaceAll("§a", "\u00039");
+            line = line.replaceAll("§b", "\u000311");
+            line = line.replaceAll("§c", "\u00034");
+            line = line.replaceAll("§d", "\u000313");
+            line = line.replaceAll("§e", "\u00038");
+            line = line.replaceAll("§f", "\u00031");
+            
+            line = line.replaceAll("§(\\d{1,2}|.)", "");
+            
+            return new CString(line, t);
+        }
+
+        public String getName() {
+            return "irc_mc2irc_colors";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[] {1};
+        }
+
+        public String docs() {
+            return "string {line} Return a string with mc colors converted to"
+                    + " irc colors. Unknown colors will be stripped. Does not"
+                    + " support styles (yet!).";
+        }
+    }
+    
+    @api
+    public static class irc_irc2mc_colors extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[] {};
+        }
+        
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("irc_irc2mc_colors:" + flatten(args), t);
+            
+            String line = args[0].val();
+            
+            line = line.replaceAll("\u00030(,\\d{1,2})?", "§0");
+            line = line.replaceAll("\u00032(,\\d{1,2})?", "§1");
+            line = line.replaceAll("\u00033(,\\d{1,2})?", "§2");
+            line = line.replaceAll("\u000310(,\\d{1,2})?", "§3");
+            line = line.replaceAll("\u00035(,\\d{1,2})?", "§4");
+            line = line.replaceAll("\u00036(,\\d{1,2})?", "§5");
+            line = line.replaceAll("\u00037(,\\d{1,2})?", "§6");
+            line = line.replaceAll("\u000315(,\\d{1,2})?", "§7");
+            line = line.replaceAll("\u000314(,\\d{1,2})?", "§8");
+            line = line.replaceAll("\u000312(,\\d{1,2})?", "§9");
+            line = line.replaceAll("\u00039(,\\d{1,2})?", "§a");
+            line = line.replaceAll("\u000311(,\\d{1,2})?", "§b");
+            line = line.replaceAll("\u00034(,\\d{1,2})?", "§c");
+            line = line.replaceAll("\u000313(,\\d{1,2})?", "§d");
+            line = line.replaceAll("\u00038(,\\d{1,2})?", "§e");
+            line = line.replaceAll("\u00031(,\\d{1,2})?", "§f");
+            
+            line = line.replaceAll("\u0003(\\d{1,2})?(,\\d{1,2})?", "");
+            
+            return new CString(line, t);
+        }
+
+        public String getName() {
+            return "irc_irc2mc_colors";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[] {1};
+        }
+
+        public String docs() {
+            return "string {line} Return a string with irc colors converted to"
+                    + " mc colors. Unknown colors will be stripped. Does not"
+                    + " support styles (yet!).";
         }
     }
 }
