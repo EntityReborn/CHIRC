@@ -23,6 +23,7 @@
  */
 package me.entityreborn.chirc;
 
+import com.entityreborn.socbot.Channel;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
@@ -48,11 +49,10 @@ import java.util.logging.Logger;
 import me.entityreborn.chirc.Events.ConnectionException;
 import static me.entityreborn.chirc.Tracking.verbose;
 import static me.entityreborn.chirc.Tracking.flatten;
-import me.entityreborn.socbot.api.Channel;
-import me.entityreborn.socbot.api.Colors;
-import me.entityreborn.socbot.api.SocBot;
-import me.entityreborn.socbot.api.Styles;
-import me.entityreborn.socbot.api.User;
+import com.entityreborn.socbot.Colors;
+import com.entityreborn.socbot.SocBot;
+import com.entityreborn.socbot.Styles;
+import com.entityreborn.socbot.User;
 
 /**
  *
@@ -408,9 +408,9 @@ public class Functions {
             
             String channel = args[1].val();
             String message = args[2].val();
-            me.entityreborn.socbot.api.Target target;
+            com.entityreborn.socbot.Target target;
             
-            if (me.entityreborn.socbot.api.Target.Util.isUser(channel, bot)) {
+            if (com.entityreborn.socbot.Target.Util.isUser(channel, bot)) {
                 target = bot.getUser(channel);
             } else {
                 target = bot.getChannel(channel);
@@ -452,9 +452,9 @@ public class Functions {
             
             String channel = args[1].val();
             String message = args[2].val();
-            me.entityreborn.socbot.api.Target target;
+            com.entityreborn.socbot.Target target;
             
-            if (me.entityreborn.socbot.api.Target.Util.isUser(channel, bot)) {
+            if (com.entityreborn.socbot.Target.Util.isUser(channel, bot)) {
                 target = bot.getUser(channel);
             } else {
                 target = bot.getChannel(channel);

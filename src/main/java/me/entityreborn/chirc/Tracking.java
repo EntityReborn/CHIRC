@@ -32,9 +32,8 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
 import java.util.Map;
-import me.entityreborn.socbot.api.SocBot;
-import me.entityreborn.socbot.core.Core;
-import me.entityreborn.socbot.events.EventManager;
+import com.entityreborn.socbot.SocBot;
+import com.entityreborn.socbot.eventsystem.EventManager;
 
 /**
  *
@@ -91,9 +90,9 @@ public class Tracking {
             return null;
         }
         
-        log("Creating irc bot with id " + id, Target.UNKNOWN);
+        verbose("Creating irc bot with id " + id, Target.UNKNOWN);
         
-        SocBot bot = new Core(id.toLowerCase());
+        SocBot bot = new SocBot(id.toLowerCase());
         
         EventManager.registerEvents(events, bot);
         
@@ -128,7 +127,7 @@ public class Tracking {
         SocBot bot = bots.remove(id.toLowerCase());
         
         if (bot != null) {
-            log("Destroying bot with id " + id, Target.UNKNOWN);
+            verbose("Destroying bot with id " + id, Target.UNKNOWN);
             
             bot.disconnect(true);
         } else {
