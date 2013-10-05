@@ -53,6 +53,7 @@ import com.entityreborn.socbot.Colors;
 import com.entityreborn.socbot.SocBot;
 import com.entityreborn.socbot.Styles;
 import com.entityreborn.socbot.User;
+import com.laytonsmith.PureUtilities.StringUtils;
 
 /**
  *
@@ -99,6 +100,31 @@ public class Functions {
         public String docs() {
             return "boolean {id} Create an IRC bot for later use. Returns true"
                     + " if that id didn't exist, and false if it did.";
+        }
+    }
+    
+    @api
+    public static class irc_strip_color extends IrcFunc {
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("irc_strip_color:" + flatten(args), t);
+            
+            String out = Colors.removeAll(args[0].val());
+            out = Styles.removeAll(out);
+            
+            return new CString(out, t);
+        }
+
+        public String getName() {
+            return "irc_strip_color";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[] {1};
+        }
+
+        public String docs() {
+            return "string {line} Remove all IRC formatting from a string.";
         }
     }
     
@@ -684,7 +710,7 @@ public class Functions {
                 }
             }
             
-            return new CString(color.toString(), t);
+            return new CString(color.toColor(), t);
         }
 
         public String getName() {
@@ -696,7 +722,8 @@ public class Functions {
         }
 
         public String docs() {
-            return "void {color[, background]} Return a colorcode for use in IRC messages.";
+            return "void {color[, background]} Return a colorcode for use in IRC messages. Values: " +
+                    StringUtils.Join(Colors.values(), ", ");
         }
     }
     
@@ -714,7 +741,7 @@ public class Functions {
             String name = args[0].val();
             Styles style;
             try {
-                style = Styles.valueOf(name);
+                style = Styles.valueOf(name.toUpperCase());
             } catch(IllegalArgumentException e) {
                 throw new ConfigRuntimeException("Bad style name", ExceptionType.FormatException, t);
             }
@@ -731,7 +758,9 @@ public class Functions {
         }
 
         public String docs() {
-            return "void {style} Return a style for use in IRC messages.";
+            return "void {style} Return a style for use in IRC messages. Values: "
+                    + StringUtils.Join(Styles.values(), ", ") + ". ITALIC and "
+                    + "STRIKETHRU don't work on all clients.";
         }
     }
 }
