@@ -38,7 +38,7 @@
         </dependency>
         
         <dependency>
-            <groupId>me.entityreborn.socbot</groupId>
+            <groupId>com.entityreborn.socbot</groupId>
             <artifactId>SocCore</artifactId>
             <version>0.0.0</version>
         </dependency>
