@@ -780,22 +780,22 @@ public class Functions {
             
             String line = args[0].val();
             
-            line = line.replaceAll("§0", "\u00030");
-            line = line.replaceAll("§1", "\u00032");
-            line = line.replaceAll("§2", "\u00033");
-            line = line.replaceAll("§3", "\u000310");
-            line = line.replaceAll("§4", "\u00035");
-            line = line.replaceAll("§5", "\u00036");
-            line = line.replaceAll("§6", "\u00037");
-            line = line.replaceAll("§7", "\u000315");
-            line = line.replaceAll("§8", "\u000314");
-            line = line.replaceAll("§9", "\u000312");
-            line = line.replaceAll("§a", "\u00039");
-            line = line.replaceAll("§b", "\u000311");
-            line = line.replaceAll("§c", "\u00034");
-            line = line.replaceAll("§d", "\u000313");
-            line = line.replaceAll("§e", "\u00038");
-            line = line.replaceAll("§f", "\u00031");
+            line = line.replaceAll("§0", "\u00031"); // Black
+            line = line.replaceAll("§1", "\u00032"); // Dark Blue
+            line = line.replaceAll("§2", "\u00033"); // Dark Green
+            line = line.replaceAll("§3", "\u000310"); // Dark Aqua
+            line = line.replaceAll("§4", "\u00035"); // Dark Red
+            line = line.replaceAll("§5", "\u00036"); // Dark Purple
+            line = line.replaceAll("§6", "\u00037"); // Gold
+            line = line.replaceAll("§7", "\u000315"); // Grey
+            line = line.replaceAll("§8", "\u000314"); // Dark Grey
+            line = line.replaceAll("§9", "\u000312"); // Blue
+            line = line.replaceAll("§a", "\u00039"); // Green
+            line = line.replaceAll("§b", "\u000311"); // Aqua
+            line = line.replaceAll("§c", "\u00034"); // Red
+            line = line.replaceAll("§d", "\u000313"); // Light Purple
+            line = line.replaceAll("§e", "\u00038"); // Yellow
+            line = line.replaceAll("§f", "\u00030"); // White
             
             line = line.replaceAll("§(\\d{1,2}|.)", "");
             
@@ -830,7 +830,7 @@ public class Functions {
             
             String line = args[0].val();
             
-            line = line.replaceAll("\u00030(,\\d{1,2})?", "§0");
+            line = line.replaceAll("\u00031(,\\d{1,2})?", "§0");
             line = line.replaceAll("\u00032(,\\d{1,2})?", "§1");
             line = line.replaceAll("\u00033(,\\d{1,2})?", "§2");
             line = line.replaceAll("\u000310(,\\d{1,2})?", "§3");
@@ -845,7 +845,7 @@ public class Functions {
             line = line.replaceAll("\u00034(,\\d{1,2})?", "§c");
             line = line.replaceAll("\u000313(,\\d{1,2})?", "§d");
             line = line.replaceAll("\u00038(,\\d{1,2})?", "§e");
-            line = line.replaceAll("\u00031(,\\d{1,2})?", "§f");
+            line = line.replaceAll("\u00030(,\\d{1,2})?", "§f");
             
             line = line.replaceAll("\u0003(\\d{1,2})?(,\\d{1,2})?", "");
             
