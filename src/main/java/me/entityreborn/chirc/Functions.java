@@ -23,7 +23,6 @@
  */
 package me.entityreborn.chirc;
 
-import android.graphics.Color;
 import com.entityreborn.socbot.Channel;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -54,7 +53,7 @@ import com.entityreborn.socbot.Colors;
 import com.entityreborn.socbot.SocBot;
 import com.entityreborn.socbot.Styles;
 import com.entityreborn.socbot.User;
-import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 
 /**
  *
@@ -63,9 +62,9 @@ import com.laytonsmith.PureUtilities.StringUtils;
 public class Functions {
     public abstract static class IrcFunc extends AbstractFunction {
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {};
+            return new ExceptionType[]{};
         }
-        
+
         public boolean isRestricted() {
             return true;
         }
@@ -78,15 +77,15 @@ public class Functions {
             return CHVersion.V3_3_1;
         }
     }
-    
+
     @api
     public static class irc_create extends IrcFunc {
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_create:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.create(args[0].val());
-            
+
             return new CBoolean(bot != null, t);
         }
 
@@ -95,7 +94,7 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {1};
+            return new Integer[]{1};
         }
 
         public String docs() {
@@ -103,16 +102,16 @@ public class Functions {
                     + " if that id didn't exist, and false if it did.";
         }
     }
-    
+
     @api
     public static class irc_strip_color extends IrcFunc {
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_strip_color:" + flatten(args), t);
-            
+
             String out = Colors.removeAll(args[0].val());
             out = Styles.removeAll(out);
-            
+
             return new CString(out, t);
         }
 
@@ -121,26 +120,26 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {1};
+            return new Integer[]{1};
         }
 
         public String docs() {
             return "string {line} Remove all IRC formatting from a string.";
         }
     }
-    
+
     @api
     public static class irc_send_raw extends IrcFunc {
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_send_raw:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.getConnected(args[0].val(), t);
-            
+
             String line = args[1].val();
-            
+
             bot.sendLine(line);
-            
+
             return new CVoid(t);
         }
 
@@ -149,22 +148,22 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {2};
+            return new Integer[]{2};
         }
 
         public String docs() {
             return "void {id, line} Send a raw IRC line. Consult the IRC RFC for details.";
         }
     }
-    
+
     @api
     public static class irc_destroy extends IrcFunc {
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_destroy:" + flatten(args), t);
-            
+
             Tracking.destroy(args[0].val(), t);
-            
+
             return new CVoid(t);
         }
 
@@ -173,7 +172,7 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {1};
+            return new Integer[]{1};
         }
 
         public String docs() {
@@ -181,89 +180,88 @@ public class Functions {
                     + " connection, and removes it's instance from memory.";
         }
     }
-    
+
     @api
     public static class irc_connect extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {
-                ExceptionType.NotFoundException, ExceptionType.IOException, 
+            return new ExceptionType[]{
+                ExceptionType.NotFoundException, ExceptionType.IOException,
                 ExceptionType.CastException, ExceptionType.RangeException};
         }
-        
-        public Construct exec(final Target t, Environment environment
-                , Construct... args) throws ConfigRuntimeException {
+
+        public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             verbose("irc_connect:" + flatten(args), t);
-            
+
             final SocBot bot = Tracking.get(args[0].val(), t);
-            
+
             String nick = args[1].val();
             final String host = args[2].val();
             final int port;
             final String password;
             boolean async = true;
-            
+
             if (args.length >= 4) {
-                if (!(args[3] instanceof CArray) || 
-                        !((CArray)args[3]).inAssociativeMode()) {
+                if (!(args[3] instanceof CArray)
+                        || !((CArray) args[3]).inAssociativeMode()) {
                     throw new ConfigRuntimeException(getName() + " expects an"
-                            + " associative array to be sent as the fourth argument", 
+                            + " associative array to be sent as the fourth argument",
                             ExceptionType.CastException, t);
                 }
-                
-                CArray arr = (CArray)args[3];
-                
+
+                CArray arr = (CArray) args[3];
+
                 if (arr.containsKey("realname")) {
                     bot.setRealname(arr.get("realname").val());
                 }
-                
+
                 if (arr.containsKey("username")) {
                     bot.setUsername(arr.get("username").val());
                 }
-                
+
                 if (arr.containsKey("port")) {
                     long iport = Static.getInt(arr.get("port"), t);
-                    
+
                     if (iport < 1 || iport > 65535) {
                         throw new ConfigRuntimeException(getName() + " expects an"
                                 + " integer between 1 and 65535 to be sent as port"
                                 + " in the fourth argument", ExceptionType.RangeException, t);
                     }
-                    
-                    port = (int)iport;
+
+                    port = (int) iport;
                 } else {
                     port = 6667;
                 }
-                
+
                 if (arr.containsKey("password")) {
                     password = arr.get("password").val();
                 } else {
                     password = null;
                 }
-                
+
                 if (arr.containsKey("runsync")) {
                     if (!(arr.get("runsync") instanceof CBoolean)) {
                         throw new ConfigRuntimeException(getName() + " expects a"
                                 + " boolean to be sent as runsync in the fourth"
                                 + " argument", ExceptionType.CastException, t);
                     }
-                    
-                    async = !((CBoolean)arr.get("runsync")).getBoolean();
+
+                    async = !((CBoolean) arr.get("runsync")).getBoolean();
                 }
             } else {
                 port = 6667;
                 password = null;
             }
-            
+
             bot.setNickname(nick);
-            
+
             final Runnable doConnect = new Runnable() {
                 public void run() {
                     try {
                         bot.connect(host, port, password);
                     } catch (IOException e) {
                         final ConnectionException event = new ConnectionException(e, bot);
-                        
+
                         try {
                             StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>() {
                                 public Object call() {
@@ -277,7 +275,7 @@ public class Functions {
                     }
                 }
             };
-            
+
             if (async) {
                 Thread th = new Thread() {
                     @Override
@@ -285,12 +283,12 @@ public class Functions {
                         doConnect.run();
                     }
                 };
-            
+
                 th.start();
             } else {
                 doConnect.run();
             }
-            
+
             return new CVoid(t);
         }
 
@@ -299,36 +297,36 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {3, 4};
+            return new Integer[]{3, 4};
         }
 
         public String docs() {
             return "void {id, nick, host[, array]} Connect to host using nickname nick.";
         }
     }
-    
+
     @api
     public static class irc_join extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {
+            return new ExceptionType[]{
                 ExceptionType.NotFoundException, ExceptionType.IOException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_join:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.getConnected(args[0].val(), t);
-            
+
             String channel = args[1].val();
-            
+
             if (args.length == 3) {
                 bot.join(channel, args[2].val());
             } else {
                 bot.join(channel);
             }
-            
+
             return new CVoid(t);
         }
 
@@ -337,36 +335,36 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {2, 3};
+            return new Integer[]{2, 3};
         }
 
         public String docs() {
             return "void {id, channel[, password]} Join a channel, optionally using a password.";
         }
     }
-    
+
     @api
     public static class irc_part extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {
+            return new ExceptionType[]{
                 ExceptionType.NotFoundException, ExceptionType.IOException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_part:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.getConnected(args[0].val(), t);
-            
+
             String channel = args[1].val();
-            
+
             if (args.length == 3) {
                 bot.part(channel, args[2].val());
             } else {
                 bot.part(channel);
             }
-            
+
             return new CVoid(t);
         }
 
@@ -375,34 +373,34 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {2, 3};
+            return new Integer[]{2, 3};
         }
 
         public String docs() {
             return "void {id, channel[, password]} Leave a channel, optionally using a message.";
         }
     }
-    
+
     @api
     public static class irc_quit extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {
+            return new ExceptionType[]{
                 ExceptionType.NotFoundException, ExceptionType.IOException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_quit:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.getConnected(args[0].val(), t);
-            
+
             if (args.length == 2) {
                 bot.quit(args[1].val());
             } else {
                 bot.quit();
             }
-            
+
             return new CVoid(t);
         }
 
@@ -411,42 +409,42 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {1, 2};
+            return new Integer[]{1, 2};
         }
 
         public String docs() {
             return "void {id, channel[, password]} Quit the server, optionally using a message.";
         }
     }
-    
+
     @api
     public static class irc_msg extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {
+            return new ExceptionType[]{
                 ExceptionType.NotFoundException, ExceptionType.IOException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_msg:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.getConnected(args[0].val(), t);
-            
+
             String channel = args[1].val();
             String message = args[2].val();
             com.entityreborn.socbot.Target target;
-            
+
             if (com.entityreborn.socbot.Target.Util.isUser(channel, bot)) {
                 target = bot.getUser(channel);
             } else {
                 target = bot.getChannel(channel);
             }
-            
+
             if (target != null) {
                 target.sendMsg(message);
             }
-            
+
             return new CVoid(t);
         }
 
@@ -455,42 +453,42 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {3};
+            return new Integer[]{3};
         }
 
         public String docs() {
             return "void {id, target, message} Send a message to target.";
         }
     }
-    
+
     @api
     public static class irc_action extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {
+            return new ExceptionType[]{
                 ExceptionType.NotFoundException, ExceptionType.IOException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_action:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.getConnected(args[0].val(), t);
-            
+
             String channel = args[1].val();
             String message = args[2].val();
             com.entityreborn.socbot.Target target;
-            
+
             if (com.entityreborn.socbot.Target.Util.isUser(channel, bot)) {
                 target = bot.getUser(channel);
             } else {
                 target = bot.getChannel(channel);
             }
-            
+
             if (target != null) {
                 target.sendCTCP("ACTION", message);
             }
-            
+
             return new CVoid(t);
         }
 
@@ -499,32 +497,32 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {3};
+            return new Integer[]{3};
         }
 
         public String docs() {
             return "void {id, target, message} Send an action to target.";
         }
     }
-    
+
     @api
     public static class irc_nick extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {
+            return new ExceptionType[]{
                 ExceptionType.NotFoundException, ExceptionType.IOException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_nick:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.getConnected(args[0].val(), t);
-            
+
             String name = args[1].val();
-            
+
             bot.setNickname(name);
-            
+
             return new CVoid(t);
         }
 
@@ -533,53 +531,53 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {2};
+            return new Integer[]{2};
         }
 
         public String docs() {
             return "void {id, newnick} Try for a new nickname.";
         }
     }
-    
+
     @api
     public static class irc_channel_info extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {
+            return new ExceptionType[]{
                 ExceptionType.NotFoundException, ExceptionType.IOException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_nick:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.getConnected(args[0].val(), t);
-            
+
             String chanName = args[1].val();
             Channel chan = bot.getChannel(chanName);
-            
+
             if (chan == null) {
                 throw new ConfigRuntimeException("Not joined to that channel!",
-                    ExceptionType.NotFoundException, t);
+                        ExceptionType.NotFoundException, t);
             }
-            
+
             CArray retn = new CArray(t);
-            
+
             retn.set("name", chan.getName());
             retn.set("modes", chan.getModes());
             retn.set("topic", chan.getTopic());
-            
+
             CArray users = new CArray(t);
-            
+
             for (Entry<User, String> entry : chan.getUserModes().entrySet()) {
                 CArray data = new CArray(t);
                 data.set("modes", entry.getValue());
-                
+
                 users.set(entry.getKey().getName(), data, t);
             }
-            
+
             retn.set("users", users, t);
-            
+
             return retn;
         }
 
@@ -588,42 +586,42 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {2};
+            return new Integer[]{2};
         }
 
         public String docs() {
             return "void {id, channel} Get info on a specific channel.";
         }
     }
-    
+
     @api
     public static class irc_user_info extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {
+            return new ExceptionType[]{
                 ExceptionType.NotFoundException, ExceptionType.IOException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_nick:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.getConnected(args[0].val(), t);
-            
+
             String userName = args[1].val();
             User user = bot.getUser(userName);
-            
+
             if (user == null) {
                 throw new ConfigRuntimeException("No idea who that is!",
-                    ExceptionType.NotFoundException, t);
+                        ExceptionType.NotFoundException, t);
             }
-            
+
             CArray retn = new CArray(t);
-            
+
             retn.set("name", user.getName());
             retn.set("modes", user.getModes());
             retn.set("hostmask", user.getHostmask());
-            
+
             return retn;
         }
 
@@ -632,39 +630,39 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {2};
+            return new Integer[]{2};
         }
 
         public String docs() {
             return "void {id, user} Get info on a specific user.";
         }
     }
-    
+
     @api
     public static class irc_info extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {ExceptionType.NotFoundException};
+            return new ExceptionType[]{ExceptionType.NotFoundException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_info:" + flatten(args), t);
-            
+
             SocBot bot = Tracking.get(args[0].val(), t);
-            
+
             CArray retn = new CArray(t);
-            
+
             CArray channels = new CArray(t);
-            
+
             for (Channel chan : bot.getChannels()) {
                 channels.push(new CString(chan.getName(), t));
             }
-            
+
             retn.set("nickname", bot.getNickname());
             retn.set("channels", channels, t);
             retn.set("connected", new CBoolean(bot.isConnected(), t), t);
-            
+
             return retn;
         }
 
@@ -673,44 +671,44 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {1};
+            return new Integer[]{1};
         }
 
         public String docs() {
             return "void {id} Get information about a specific irc connection.";
         }
     }
-    
+
     @api
     public static class irc_color extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {ExceptionType.FormatException};
+            return new ExceptionType[]{ExceptionType.FormatException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_color:" + flatten(args), t);
-            
+
             String name = args[0].val().toUpperCase();
             Colors color;
-            
+
             try {
                 color = Colors.valueOf(name);
-            } catch(IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 throw new ConfigRuntimeException("Bad foreground color name", ExceptionType.FormatException, t);
             }
-            
+
             if (args.length == 2) {
                 try {
                     String background = args[1].val();
-                    
+
                     color.setBackground(background);
-                } catch(IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     throw new ConfigRuntimeException("Bad background color name", ExceptionType.FormatException, t);
                 }
             }
-            
+
             return new CString(color.toColor(), t);
         }
 
@@ -719,36 +717,34 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {1, 2};
+            return new Integer[]{1, 2};
         }
 
         public String docs() {
-            return "void {color[, background]} Return a colorcode for use in IRC messages. Values: " +
-                    StringUtils.Join(Colors.values(), ", ");
+            return "void {color[, background]} Return a colorcode for use in IRC messages. Values: "
+                    + StringUtils.Join(Colors.values(), ", ");
         }
     }
-    
-    
-    
+
     @api
     public static class irc_style extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {ExceptionType.FormatException};
+            return new ExceptionType[]{ExceptionType.FormatException};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_style:" + flatten(args), t);
-            
+
             String name = args[0].val();
             Styles style;
             try {
                 style = Styles.valueOf(name.toUpperCase());
-            } catch(IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 throw new ConfigRuntimeException("Bad style name", ExceptionType.FormatException, t);
             }
-            
+
             return new CString(style.toString(), t);
         }
 
@@ -757,7 +753,7 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {1};
+            return new Integer[]{1};
         }
 
         public String docs() {
@@ -766,20 +762,20 @@ public class Functions {
                     + "STRIKETHRU don't work on all clients.";
         }
     }
-    
+
     @api
     public static class irc_mc2irc_colors extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {};
+            return new ExceptionType[]{};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_mc2irc_colors:" + flatten(args), t);
-            
+
             String line = args[0].val();
-            
+
             line = line.replaceAll("§0", "\u00031"); // Black
             line = line.replaceAll("§1", "\u00032"); // Dark Blue
             line = line.replaceAll("§2", "\u00033"); // Dark Green
@@ -796,9 +792,9 @@ public class Functions {
             line = line.replaceAll("§d", "\u000313"); // Light Purple
             line = line.replaceAll("§e", "\u00038"); // Yellow
             line = line.replaceAll("§f", "\u00030"); // White
-            
+
             line = line.replaceAll("§(\\d{1,2}|.)", "");
-            
+
             return new CString(line, t);
         }
 
@@ -807,7 +803,7 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {1};
+            return new Integer[]{1};
         }
 
         public String docs() {
@@ -816,20 +812,20 @@ public class Functions {
                     + " support styles (yet!).";
         }
     }
-    
+
     @api
     public static class irc_irc2mc_colors extends IrcFunc {
         @Override
         public ExceptionType[] thrown() {
-            return new ExceptionType[] {};
+            return new ExceptionType[]{};
         }
-        
+
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
             verbose("irc_irc2mc_colors:" + flatten(args), t);
-            
+
             String line = args[0].val();
-            
+
             line = line.replaceAll("\u00031(,\\d{1,2})?", "§0");
             line = line.replaceAll("\u00032(,\\d{1,2})?", "§1");
             line = line.replaceAll("\u00033(,\\d{1,2})?", "§2");
@@ -846,9 +842,9 @@ public class Functions {
             line = line.replaceAll("\u000313(,\\d{1,2})?", "§d");
             line = line.replaceAll("\u00038(,\\d{1,2})?", "§e");
             line = line.replaceAll("\u00030(,\\d{1,2})?", "§f");
-            
+
             line = line.replaceAll("\u0003(\\d{1,2})?(,\\d{1,2})?", "");
-            
+
             return new CString(line, t);
         }
 
@@ -857,7 +853,7 @@ public class Functions {
         }
 
         public Integer[] numArgs() {
-            return new Integer[] {1};
+            return new Integer[]{1};
         }
 
         public String docs() {
