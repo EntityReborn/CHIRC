@@ -25,7 +25,6 @@ package me.entityreborn.chirc;
 
 import com.laytonsmith.annotations.shutdown;
 import com.laytonsmith.annotations.startup;
-import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -34,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.entityreborn.socbot.SocBot;
 import com.entityreborn.socbot.eventsystem.EventManager;
+import static me.entityreborn.chirc.Utils.getVersion;
 
 /**
  *
@@ -43,16 +43,14 @@ public class Tracking {
     private static final Map<String, SocBot> bots = new HashMap<String, SocBot>();
     private static final Events events = new Events();
     
-    private static final String VERSION = "0.0.0";
-    
     @startup
     public static void startup() {
-        log("CHIRC v." + VERSION + " loaded.", Target.UNKNOWN);
+        Utils.log("CHIRC", "v." + getVersion() + " loaded.", Target.UNKNOWN);
     }
     
     @shutdown
     public static void shutdown() {
-        log("CHIRC v." + VERSION + " stopping...", Target.UNKNOWN);
+        Utils.log("CHIRC", "v." + getVersion() + " stopping...", Target.UNKNOWN);
         
         for (SocBot bot : bots.values()) {
             bot.disconnect(true);
@@ -60,15 +58,8 @@ public class Tracking {
         
         bots.clear();
         
-        log("CHIRC v." + VERSION + " stopped", Target.UNKNOWN);
-    }
-    
-    public static void log(String line, Target targ) {
-        CHLog.GetLogger().i(CHLog.Tags.EXTENSIONS, "[CHIRC] " + line, targ);
-    }
-    
-    public static void verbose(String line, Target targ) {
-        CHLog.GetLogger().v(CHLog.Tags.EXTENSIONS, "[CHIRC] " + line, targ);
+        Utils.log("CHIRC", "v." + getVersion() + " stopped", Target.UNKNOWN);
+                
     }
     
     public static String flatten(Construct... args) {
@@ -90,7 +81,7 @@ public class Tracking {
             return null;
         }
         
-        verbose("Creating irc bot with id " + id, Target.UNKNOWN);
+        Utils.verbose("CHIRC", "Creating irc bot with id " + id, Target.UNKNOWN);
         
         SocBot bot = new SocBot(id.toLowerCase());
         
@@ -127,7 +118,7 @@ public class Tracking {
         SocBot bot = bots.remove(id.toLowerCase());
         
         if (bot != null) {
-            verbose("Destroying bot with id " + id, Target.UNKNOWN);
+            Utils.verbose("CHIRC", "Destroying bot with id " + id, t);
             
             bot.disconnect(true);
         } else {

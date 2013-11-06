@@ -47,7 +47,7 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import me.entityreborn.chirc.Events.ConnectionException;
-import static me.entityreborn.chirc.Tracking.verbose;
+import static me.entityreborn.chirc.Utils.verbose;
 import static me.entityreborn.chirc.Tracking.flatten;
 import com.entityreborn.socbot.Colors;
 import com.entityreborn.socbot.SocBot;
@@ -82,7 +82,7 @@ public class Functions {
     public static class irc_create extends IrcFunc {
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_create:" + flatten(args), t);
+            verbose("CHIRC", "irc_create:" + flatten(args), t);
 
             SocBot bot = Tracking.create(args[0].val());
 
@@ -107,7 +107,7 @@ public class Functions {
     public static class irc_strip_color extends IrcFunc {
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_strip_color:" + flatten(args), t);
+            verbose("CHIRC", "irc_strip_color:" + flatten(args), t);
 
             String out = Colors.removeAll(args[0].val());
             out = Styles.removeAll(out);
@@ -132,7 +132,7 @@ public class Functions {
     public static class irc_send_raw extends IrcFunc {
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_send_raw:" + flatten(args), t);
+            verbose("CHIRC", "irc_send_raw:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
 
@@ -160,7 +160,7 @@ public class Functions {
     public static class irc_destroy extends IrcFunc {
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_destroy:" + flatten(args), t);
+            verbose("CHIRC", "irc_destroy:" + flatten(args), t);
 
             Tracking.destroy(args[0].val(), t);
 
@@ -191,7 +191,7 @@ public class Functions {
         }
 
         public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            verbose("irc_connect:" + flatten(args), t);
+            verbose("CHIRC", "irc_connect:" + flatten(args), t);
 
             final SocBot bot = Tracking.get(args[0].val(), t);
 
@@ -315,7 +315,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_join:" + flatten(args), t);
+            verbose("CHIRC", "irc_join:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
 
@@ -353,7 +353,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_part:" + flatten(args), t);
+            verbose("CHIRC", "irc_part:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
 
@@ -391,7 +391,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_quit:" + flatten(args), t);
+            verbose("CHIRC", "irc_quit:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
 
@@ -427,7 +427,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_msg:" + flatten(args), t);
+            verbose("CHIRC", "irc_msg:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
 
@@ -471,7 +471,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_action:" + flatten(args), t);
+            verbose("CHIRC", "irc_action:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
 
@@ -515,7 +515,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_nick:" + flatten(args), t);
+            verbose("CHIRC", "irc_nick:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
 
@@ -549,7 +549,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_nick:" + flatten(args), t);
+            verbose("CHIRC", "irc_nick:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
 
@@ -604,7 +604,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_nick:" + flatten(args), t);
+            verbose("CHIRC", "irc_nick:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
 
@@ -647,7 +647,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_info:" + flatten(args), t);
+            verbose("CHIRC", "irc_info:" + flatten(args), t);
 
             SocBot bot = Tracking.get(args[0].val(), t);
 
@@ -688,7 +688,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_color:" + flatten(args), t);
+            verbose("CHIRC", "irc_color:" + flatten(args), t);
 
             String name = args[0].val().toUpperCase();
             Colors color;
@@ -735,7 +735,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_style:" + flatten(args), t);
+            verbose("CHIRC", "irc_style:" + flatten(args), t);
 
             String name = args[0].val();
             Styles style;
@@ -772,7 +772,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_mc2irc_colors:" + flatten(args), t);
+            verbose("CHIRC", "irc_mc2irc_colors:" + flatten(args), t);
 
             String line = args[0].val();
 
@@ -822,7 +822,7 @@ public class Functions {
 
         public Construct exec(Target t, Environment environment,
                 Construct... args) throws ConfigRuntimeException {
-            verbose("irc_irc2mc_colors:" + flatten(args), t);
+            verbose("CHIRC", "irc_irc2mc_colors:" + flatten(args), t);
 
             String line = args[0].val();
 

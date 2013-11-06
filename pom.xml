@@ -15,6 +15,12 @@
         <url>http://ci.nixium.com/job/CHIRC/</url>
     </ciManagement>
     
+    <scm>
+        <connection>scm:git:git://github.com:EntityReborn/CHIRC.git</connection>
+        <url>https://github.com/EntityReborn/CHIRC</url>
+        <developerConnection>scm:git:git@github.com:EntityReborn/CHIRC.git</developerConnection>
+    </scm>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -60,30 +66,54 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <inherited>true</inherited>
-                <version>2.4</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 
                 <configuration>
-                    <archive>                   
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                </configuration>
+                
+                <version>1.2</version>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                        
                         <manifest>
-                            <mainClass>me.entityreborn.chirc.Tracking</mainClass>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                         
                         <manifestEntries>
-                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Implementation-Version>${project.version}-${buildNumber}</Implementation-Version>
                         </manifestEntries>
                     </archive>
                 </configuration>
+                
+                <version>2.4</version>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>1.4</version>
+                
                 <executions>
                     <execution>
                         <id>ShadedBundle</id>
@@ -92,15 +122,6 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
-                        
-                        <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>org.eclipse</pattern>
-                                    <shadedPattern>org.shaded.eclipse</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
