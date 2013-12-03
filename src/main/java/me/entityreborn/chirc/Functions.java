@@ -54,6 +54,7 @@ import com.entityreborn.socbot.SocBot;
 import com.entityreborn.socbot.Styles;
 import com.entityreborn.socbot.User;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
+import org.bukkit.ChatColor;
 
 /**
  *
@@ -775,25 +776,24 @@ public class Functions {
             verbose("CHIRC", "irc_mc2irc_colors:" + flatten(args), t);
 
             String line = args[0].val();
-
-            line = line.replaceAll("§0", "\u00031"); // Black
-            line = line.replaceAll("§1", "\u00032"); // Dark Blue
-            line = line.replaceAll("§2", "\u00033"); // Dark Green
+            line = line.replaceAll("§0", "\u000301"); // Black
+            line = line.replaceAll("§1", "\u000302"); // Dark Blue
+            line = line.replaceAll("§2", "\u000303"); // Dark Green
             line = line.replaceAll("§3", "\u000310"); // Dark Aqua
-            line = line.replaceAll("§4", "\u00035"); // Dark Red
-            line = line.replaceAll("§5", "\u00036"); // Dark Purple
-            line = line.replaceAll("§6", "\u00037"); // Gold
+            line = line.replaceAll("§4", "\u000305"); // Dark Red
+            line = line.replaceAll("§5", "\u000306"); // Dark Purple
+            line = line.replaceAll("§6", "\u000307"); // Gold
             line = line.replaceAll("§7", "\u000315"); // Grey
             line = line.replaceAll("§8", "\u000314"); // Dark Grey
             line = line.replaceAll("§9", "\u000312"); // Blue
-            line = line.replaceAll("§a", "\u00039"); // Green
+            line = line.replaceAll("§a", "\u000309"); // Green
             line = line.replaceAll("§b", "\u000311"); // Aqua
-            line = line.replaceAll("§c", "\u00034"); // Red
+            line = line.replaceAll("§c", "\u000304"); // Red
             line = line.replaceAll("§d", "\u000313"); // Light Purple
-            line = line.replaceAll("§e", "\u00038"); // Yellow
-            line = line.replaceAll("§f", "\u00030"); // White
+            line = line.replaceAll("§e", "\u000308"); // Yellow
+            line = line.replaceAll("§f", "\u000300"); // White
 
-            line = line.replaceAll("§(\\d{1,2}|.)", "");
+            line = line.replaceAll("§.", "");
 
             return new CString(line, t);
         }
@@ -825,25 +825,27 @@ public class Functions {
             verbose("CHIRC", "irc_irc2mc_colors:" + flatten(args), t);
 
             String line = args[0].val();
+            String background = "(,(1[0-5]|0?[0-9])?";
+            
+            line = line.replaceAll("\u00030?1" + background, "§0");
+            line = line.replaceAll("\u00030?2" + background, "§1");
+            line = line.replaceAll("\u00030?3" + background, "§2");
+            line = line.replaceAll("\u000310" + background, "§3");
+            line = line.replaceAll("\u00030?5" + background, "§4");
+            line = line.replaceAll("\u00030?6" + background, "§5");
+            line = line.replaceAll("\u00030?7" + background, "§6");
+            line = line.replaceAll("\u000315" + background, "§7");
+            line = line.replaceAll("\u000314" + background, "§8");
+            line = line.replaceAll("\u000312" + background, "§9");
+            line = line.replaceAll("\u00030?9" + background, "§a");
+            line = line.replaceAll("\u000311" + background, "§b");
+            line = line.replaceAll("\u00030?4" + background, "§c");
+            line = line.replaceAll("\u000313" + background, "§d");
+            line = line.replaceAll("\u00030?8" + background, "§e");
+            line = line.replaceAll("\u00030?0" + background, "§f");
 
-            line = line.replaceAll("\u00031(,\\d{1,2})?", "§0");
-            line = line.replaceAll("\u00032(,\\d{1,2})?", "§1");
-            line = line.replaceAll("\u00033(,\\d{1,2})?", "§2");
-            line = line.replaceAll("\u000310(,\\d{1,2})?", "§3");
-            line = line.replaceAll("\u00035(,\\d{1,2})?", "§4");
-            line = line.replaceAll("\u00036(,\\d{1,2})?", "§5");
-            line = line.replaceAll("\u00037(,\\d{1,2})?", "§6");
-            line = line.replaceAll("\u000315(,\\d{1,2})?", "§7");
-            line = line.replaceAll("\u000314(,\\d{1,2})?", "§8");
-            line = line.replaceAll("\u000312(,\\d{1,2})?", "§9");
-            line = line.replaceAll("\u00039(,\\d{1,2})?", "§a");
-            line = line.replaceAll("\u000311(,\\d{1,2})?", "§b");
-            line = line.replaceAll("\u00034(,\\d{1,2})?", "§c");
-            line = line.replaceAll("\u000313(,\\d{1,2})?", "§d");
-            line = line.replaceAll("\u00038(,\\d{1,2})?", "§e");
-            line = line.replaceAll("\u00030(,\\d{1,2})?", "§f");
-
-            line = line.replaceAll("\u0003(\\d{1,2})?(,\\d{1,2})?", "");
+            line = Colors.removeAll(line);
+            line = Styles.removeAll(line);
 
             return new CString(line, t);
         }
