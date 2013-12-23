@@ -24,6 +24,11 @@
 package me.entityreborn.chirc;
 
 import com.entityreborn.socbot.Channel;
+import com.entityreborn.socbot.Colors;
+import com.entityreborn.socbot.SocBot;
+import com.entityreborn.socbot.Styles;
+import com.entityreborn.socbot.User;
+import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
@@ -42,19 +47,14 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import me.entityreborn.chirc.Events.ConnectionException;
-import static me.entityreborn.chirc.Utils.verbose;
 import static me.entityreborn.chirc.Tracking.flatten;
-import com.entityreborn.socbot.Colors;
-import com.entityreborn.socbot.SocBot;
-import com.entityreborn.socbot.Styles;
-import com.entityreborn.socbot.User;
-import com.laytonsmith.PureUtilities.Common.StringUtils;
-import org.bukkit.ChatColor;
+import static me.entityreborn.chirc.Utils.verbose;
 
 /**
  *
@@ -695,16 +695,16 @@ public class Functions {
             Colors color;
 
             try {
-                color = Colors.valueOf(name);
+                color = Colors.valueOf(name.replace(" ", ""));
             } catch (IllegalArgumentException e) {
                 throw new ConfigRuntimeException("Bad foreground color name", ExceptionType.FormatException, t);
             }
 
             if (args.length == 2) {
                 try {
-                    String background = args[1].val();
+                    String background = args[1].val().toUpperCase();
 
-                    color.setBackground(background);
+                    color.setBackground(background.replace(" ", ""));
                 } catch (IllegalArgumentException e) {
                     throw new ConfigRuntimeException("Bad background color name", ExceptionType.FormatException, t);
                 }
@@ -862,6 +862,237 @@ public class Functions {
             return "string {line} Return a string with irc colors converted to"
                     + " mc colors. Unknown colors will be stripped. Does not"
                     + " support styles (yet!).";
+        }
+    }
+    
+    @api
+    public static class irc_user_meta extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("CHIRC", "irc_user_meta:" + flatten(args), t);
+            
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
+
+            String userName = args[1].val();
+            User user = bot.getUser(userName);
+
+            if (user == null) {
+                throw new ConfigRuntimeException("No idea who that is!",
+                        ExceptionType.NotFoundException, t);
+            }
+            
+            CArray retn = new CArray(t);
+            
+            for (Map.Entry<String, Object> entry : user.getMetaData().entrySet()) {
+                String key = entry.getKey();
+                
+                if (entry.getValue() instanceof Construct) {
+                    Construct value = (Construct)entry.getValue();
+                    retn.set(key, value, t);
+                } else {
+                    String value = entry.getValue().toString();
+                    retn.set(key, value);
+                }
+            }
+            
+            return retn;
+        }
+
+        public String getName() {
+            return "irc_user_meta";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "array {id, name} Return an array of metadata for a given user.";
+        }
+    }
+    
+    @api
+    public static class irc_channel_meta extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("CHIRC", "irc_channel_meta:" + flatten(args), t);
+            
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
+
+            String chanName = args[1].val();
+            Channel channel = bot.getChannel(chanName);
+
+            if (channel == null) {
+                throw new ConfigRuntimeException("No clue about that channel!",
+                        ExceptionType.NotFoundException, t);
+            }
+            
+            CArray retn = new CArray(t);
+            
+            for (Map.Entry<String, Object> entry : channel.getMetaData().entrySet()) {
+                String key = entry.getKey();
+                
+                if (entry.getValue() instanceof Construct) {
+                    Construct value = (Construct)entry.getValue();
+                    retn.set(key, value, t);
+                } else {
+                    String value = entry.getValue().toString();
+                    retn.set(key, value);
+                }
+            }
+            
+            return retn;
+        }
+
+        public String getName() {
+            return "irc_channel_meta";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "array {id, name} Return an array of metadata for a given channel.";
+        }
+    }
+    
+    @api
+    public static class irc_set_user_meta extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("CHIRC", "irc_set_user_meta:" + flatten(args), t);
+            
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
+
+            String userName = args[1].val();
+            User user = bot.getUser(userName);
+
+            if (user == null) {
+                throw new ConfigRuntimeException("No idea who that user is!",
+                        ExceptionType.NotFoundException, t);
+            }
+            
+            String key = args[2].val();
+            Construct value = args[3];
+            
+            user.setMetaData(key, value);
+            
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "irc_set_user_meta";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{4};
+        }
+
+        public String docs() {
+            return "array {id, name, key, value} Set metadata for a given user.";
+        }
+    }
+    
+    @api
+    public static class irc_set_channel_meta extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("CHIRC", "irc_set_channel_meta:" + flatten(args), t);
+            
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
+
+            String chanName = args[1].val();
+            Channel channel = bot.getChannel(chanName);
+
+            if (channel == null) {
+                throw new ConfigRuntimeException("No idea about that channel!",
+                        ExceptionType.NotFoundException, t);
+            }
+            
+            String key = args[2].val();
+            Construct value = args[3];
+            
+            channel.setMetaData(key, value);
+            
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "irc_set_channel_meta";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{4};
+        }
+
+        public String docs() {
+            return "array {id, name, key, value} Set metadata for a given channel.";
+        }
+    }
+    
+    @api
+    public static class irc_del_user_meta extends IrcFunc {
+        @Override
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public Construct exec(Target t, Environment environment,
+                Construct... args) throws ConfigRuntimeException {
+            verbose("CHIRC", "irc_del_user_meta:" + flatten(args), t);
+            
+            SocBot bot = Tracking.getConnected(args[0].val(), t);
+
+            String userName = args[1].val();
+            User user = bot.getUser(userName);
+
+            if (user == null) {
+                throw new ConfigRuntimeException("No idea who that user is!",
+                        ExceptionType.NotFoundException, t);
+            }
+            
+            String key = args[2].val();
+            
+            Object retn = user.remMetaData(key);
+            
+            if (retn instanceof Construct) {
+                return (Construct)retn;
+            } else {
+                return new CString(retn.toString(), t);
+            }
+        }
+
+        public String getName() {
+            return "irc_del_user_meta";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{3};
+        }
+
+        public String docs() {
+            return "mixed {id, name, key} Deletes metadata for a given user and returns it.";
         }
     }
 }

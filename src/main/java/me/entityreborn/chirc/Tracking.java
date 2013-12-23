@@ -23,33 +23,33 @@
  */
 package me.entityreborn.chirc;
 
-import com.laytonsmith.annotations.shutdown;
-import com.laytonsmith.annotations.startup;
+import com.entityreborn.socbot.SocBot;
+import com.entityreborn.socbot.eventsystem.EventManager;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.extensions.AbstractExtension;
+import com.laytonsmith.core.extensions.MSExtension;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
 import java.util.Map;
-import com.entityreborn.socbot.SocBot;
-import com.entityreborn.socbot.eventsystem.EventManager;
 import static me.entityreborn.chirc.Utils.getVersion;
 
 /**
  *
  * @author Jason Unger <entityreborn@gmail.com>
  */
-public class Tracking {
+@MSExtension("CHIRC")
+public class Tracking extends AbstractExtension {
     private static final Map<String, SocBot> bots = new HashMap<String, SocBot>();
     private static final Events events = new Events();
     
-    @startup
-    public static void startup() {
+    @Override
+    public void onStartup() {
         Utils.log("CHIRC", "v." + getVersion() + " loaded.", Target.UNKNOWN);
     }
     
-    @shutdown
-    public static void shutdown() {
+    public void onShutdown() {
         Utils.log("CHIRC", "v." + getVersion() + " stopping...", Target.UNKNOWN);
         
         for (SocBot bot : bots.values()) {
