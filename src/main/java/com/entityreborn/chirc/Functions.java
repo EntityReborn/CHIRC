@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package me.entityreborn.chirc;
+package com.entityreborn.chirc;
 
 import com.entityreborn.socbot.Channel;
 import com.entityreborn.socbot.Colors;
@@ -52,9 +52,9 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import me.entityreborn.chirc.Events.ConnectionException;
-import static me.entityreborn.chirc.Tracking.flatten;
-import static me.entityreborn.chirc.Utils.verbose;
+import com.entityreborn.chirc.Events.ConnectionException;
+import static com.entityreborn.chirc.Tracking.flatten;
+import static com.entityreborn.chirc.Utils.verbose;
 
 /**
  *

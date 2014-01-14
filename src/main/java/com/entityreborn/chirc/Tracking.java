@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package me.entityreborn.chirc;
+package com.entityreborn.chirc;
 
 import com.entityreborn.socbot.SocBot;
 import com.entityreborn.socbot.eventsystem.EventManager;
@@ -33,7 +33,7 @@ import com.laytonsmith.core.extensions.MSExtension;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
 import java.util.Map;
-import static me.entityreborn.chirc.Utils.getVersion;
+import static com.entityreborn.chirc.Utils.getVersion;
 
 /**
  *

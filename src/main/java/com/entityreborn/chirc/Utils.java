@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package me.entityreborn.chirc;
+package com.entityreborn.chirc;
 
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.constructs.Target;
