@@ -25,6 +25,8 @@ package com.entityreborn.chirc;
 
 import com.entityreborn.socbot.SocBot;
 import com.entityreborn.socbot.eventsystem.EventManager;
+import com.laytonsmith.PureUtilities.SimpleVersion;
+import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -33,7 +35,6 @@ import com.laytonsmith.core.extensions.MSExtension;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
 import java.util.Map;
-import static com.entityreborn.chirc.Utils.getVersion;
 
 /**
  *
@@ -49,6 +50,7 @@ public class Tracking extends AbstractExtension {
         Utils.log("CHIRC", "v." + getVersion() + " loaded.", Target.UNKNOWN);
     }
     
+    @Override
     public void onShutdown() {
         Utils.log("CHIRC", "v." + getVersion() + " stopping...", Target.UNKNOWN);
         
@@ -125,5 +127,9 @@ public class Tracking extends AbstractExtension {
             throw new ConfigRuntimeException("That id doesn't exist!",
                     ExceptionType.NotFoundException, t);
         }
+    }
+
+    public Version getVersion() {
+        return new SimpleVersion(0,0,1);
     }
 }
