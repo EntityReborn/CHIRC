@@ -577,7 +577,7 @@ public class Events implements Listener {
                 Numeric msg = (Numeric) e;
 
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
-                retn.put("numeric", new CBoolean(msg.getNumeric().name(), Target.UNKNOWN));
+                retn.put("numeric", new CBoolean(msg.getNumeric().getName(), Target.UNKNOWN));
                 retn.put("numericid", new CInt(msg.getNumeric().getCode(), Target.UNKNOWN));
                 retn.put("args", Construct.GetConstruct(msg.getArgs()));
                 retn.put("message", new CString(msg.getMessage(), Target.UNKNOWN));
