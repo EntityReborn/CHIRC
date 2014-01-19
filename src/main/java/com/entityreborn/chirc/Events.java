@@ -87,7 +87,7 @@ public class Events implements Listener {
     }
     
     @EventHandler
-    public void handleNick(NickInUseEvent e) {
+    public void handleNickInUse(NickInUseEvent e) {
         final NickInUse event = new NickInUse(e);
         fireEvent("irc_nick_in_use", event);
     }
