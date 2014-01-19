@@ -23,6 +23,7 @@
  */
 package com.entityreborn.chirc;
 
+import com.entityreborn.socbot.Numerics;
 import com.entityreborn.socbot.Packet;
 import com.entityreborn.socbot.SocBot;
 import com.entityreborn.socbot.events.CTCPEvent;
@@ -32,6 +33,7 @@ import com.entityreborn.socbot.events.ErrorEvent;
 import com.entityreborn.socbot.events.JoinEvent;
 import com.entityreborn.socbot.events.NickEvent;
 import com.entityreborn.socbot.events.NickInUseEvent;
+import com.entityreborn.socbot.events.NumericEvent;
 import com.entityreborn.socbot.events.PacketReceivedEvent;
 import com.entityreborn.socbot.events.PartEvent;
 import com.entityreborn.socbot.events.PrivmsgEvent;
@@ -57,6 +59,7 @@ import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -90,6 +93,12 @@ public class Events implements Listener {
     public void handleNickInUse(NickInUseEvent e) {
         final NickInUse event = new NickInUse(e);
         fireEvent("irc_nick_in_use", event);
+    }
+    
+    @EventHandler
+    public void handleNumeric(NumericEvent e) {
+        final Numeric event = new Numeric(e);
+        fireEvent("irc_numeric", event);
     }
 
     @EventHandler
@@ -247,6 +256,34 @@ public class Events implements Listener {
 
         public String getNick() {
             return event.getNick();
+        }
+    }
+    
+    private static class Numeric implements BindableEvent {
+        private final NumericEvent event;
+
+        public Numeric(NumericEvent event) {
+            this.event = event;
+        }
+
+        public Object _GetObject() {
+            return this;
+        }
+
+        public SocBot getBot() {
+            return event.getBot();
+        }
+
+        public Numerics.Numeric getNumeric() {
+            return event.getNumeric();
+        }
+        
+        public String getMessage() {
+            return event.getMessage();
+        }
+        
+        public List<String> getArgs() {
+            return event.getPacket().getArgs();
         }
     }
 
@@ -521,6 +558,29 @@ public class Events implements Listener {
 
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("nick", new CBoolean(msg.getNick(), Target.UNKNOWN));
+            }
+
+            return retn;
+        }
+    }
+    
+    @api
+    public static class irc_numeric extends IrcEvent {
+        public String getName() {
+            return "irc_numeric";
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            Map<String, Construct> retn = new HashMap<String, Construct>();
+
+            if (e instanceof Numeric) {
+                Numeric msg = (Numeric) e;
+
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
+                retn.put("numeric", new CBoolean(msg.getNumeric().name(), Target.UNKNOWN));
+                retn.put("numericid", new CInt(msg.getNumeric().getCode(), Target.UNKNOWN));
+                retn.put("args", Construct.GetConstruct(msg.getArgs()));
+                retn.put("message", new CString(msg.getMessage(), Target.UNKNOWN));
             }
 
             return retn;
