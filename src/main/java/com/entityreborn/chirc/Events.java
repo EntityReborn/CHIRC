@@ -31,6 +31,7 @@ import com.entityreborn.socbot.events.DisconnectedEvent;
 import com.entityreborn.socbot.events.ErrorEvent;
 import com.entityreborn.socbot.events.JoinEvent;
 import com.entityreborn.socbot.events.NickEvent;
+import com.entityreborn.socbot.events.NickInUseEvent;
 import com.entityreborn.socbot.events.PacketReceivedEvent;
 import com.entityreborn.socbot.events.PartEvent;
 import com.entityreborn.socbot.events.PrivmsgEvent;
@@ -83,6 +84,12 @@ public class Events implements Listener {
     public void handleNick(NickEvent e) {
         final Nick event = new Nick(e);
         fireEvent("irc_nick_changed", event);
+    }
+    
+    @EventHandler
+    public void handleNick(NickInUseEvent e) {
+        final NickInUse event = new NickInUse(e);
+        fireEvent("irc_nick_in_use", event);
     }
 
     @EventHandler
@@ -220,6 +227,26 @@ public class Events implements Listener {
 
         public String getNew() {
             return event.getNewNick();
+        }
+    }
+    
+    private static class NickInUse implements BindableEvent {
+        private final NickInUseEvent event;
+
+        public NickInUse(NickInUseEvent event) {
+            this.event = event;
+        }
+
+        public Object _GetObject() {
+            return this;
+        }
+
+        public SocBot getBot() {
+            return event.getBot();
+        }
+
+        public String getNick() {
+            return event.getNick();
         }
     }
 
@@ -474,6 +501,26 @@ public class Events implements Listener {
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
                 retn.put("oldnick", new CBoolean(msg.getOld(), Target.UNKNOWN));
                 retn.put("newnick", new CBoolean(msg.getNew(), Target.UNKNOWN));
+            }
+
+            return retn;
+        }
+    }
+    
+    @api
+    public static class irc_nick_in_use extends IrcEvent {
+        public String getName() {
+            return "irc_nick_in_use";
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            Map<String, Construct> retn = new HashMap<String, Construct>();
+
+            if (e instanceof NickInUse) {
+                NickInUse msg = (NickInUse) e;
+
+                retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
+                retn.put("nick", new CBoolean(msg.getNick(), Target.UNKNOWN));
             }
 
             return retn;
