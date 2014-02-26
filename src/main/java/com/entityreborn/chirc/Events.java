@@ -536,8 +536,8 @@ public class Events implements Listener {
                 Nick msg = (Nick) e;
 
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
-                retn.put("oldnick", new CBoolean(msg.getOld(), Target.UNKNOWN));
-                retn.put("newnick", new CBoolean(msg.getNew(), Target.UNKNOWN));
+                retn.put("oldnick", new CString(msg.getOld(), Target.UNKNOWN));
+                retn.put("newnick", new CString(msg.getNew(), Target.UNKNOWN));
             }
 
             return retn;
