@@ -23,6 +23,9 @@
  */
 package com.entityreborn.chirc;
 
+import com.entityreborn.chirc.Events.ConnectionException;
+import static com.entityreborn.chirc.Tracking.flatten;
+import static com.entityreborn.chirc.Utils.verbose;
 import com.entityreborn.socbot.Channel;
 import com.entityreborn.socbot.Colors;
 import com.entityreborn.socbot.SocBot;
@@ -36,8 +39,8 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -52,9 +55,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.entityreborn.chirc.Events.ConnectionException;
-import static com.entityreborn.chirc.Tracking.flatten;
-import static com.entityreborn.chirc.Utils.verbose;
 
 /**
  *
@@ -141,7 +141,7 @@ public class Functions {
 
             bot.sendLine(line);
 
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
@@ -165,7 +165,7 @@ public class Functions {
 
             Tracking.destroy(args[0].val(), t);
 
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
@@ -290,7 +290,7 @@ public class Functions {
                 doConnect.run();
             }
 
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
@@ -328,7 +328,7 @@ public class Functions {
                 bot.join(channel);
             }
 
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
@@ -366,7 +366,7 @@ public class Functions {
                 bot.part(channel);
             }
 
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
@@ -402,7 +402,7 @@ public class Functions {
                 bot.quit();
             }
 
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
@@ -446,7 +446,7 @@ public class Functions {
                 target.sendMsg(message);
             }
 
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
@@ -490,7 +490,7 @@ public class Functions {
                 target.sendCTCP("ACTION", message);
             }
 
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
@@ -524,7 +524,7 @@ public class Functions {
 
             bot.setNickname(name);
 
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
@@ -993,7 +993,7 @@ public class Functions {
             
             user.setMetaData(key, value);
             
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
@@ -1035,7 +1035,7 @@ public class Functions {
             
             channel.setMetaData(key, value);
             
-            return new CVoid(t);
+            return CNull.NULL;
         }
 
         public String getName() {
