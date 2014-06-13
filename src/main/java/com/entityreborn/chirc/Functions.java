@@ -87,7 +87,7 @@ public class Functions {
 
             SocBot bot = Tracking.create(args[0].val());
 
-            return new CBoolean(bot != null, t);
+            return CBoolean.get(bot != null);
         }
 
         public String getName() {
@@ -213,15 +213,15 @@ public class Functions {
                 CArray arr = (CArray) args[3];
 
                 if (arr.containsKey("realname")) {
-                    bot.setRealname(arr.get("realname").val());
+                    bot.setRealname(arr.get("realname", t).val());
                 }
 
                 if (arr.containsKey("username")) {
-                    bot.setUsername(arr.get("username").val());
+                    bot.setUsername(arr.get("username", t).val());
                 }
 
                 if (arr.containsKey("port")) {
-                    long iport = Static.getInt(arr.get("port"), t);
+                    long iport = Static.getInt(arr.get("port", t), t);
 
                     if (iport < 1 || iport > 65535) {
                         throw new ConfigRuntimeException(getName() + " expects an"
@@ -235,19 +235,19 @@ public class Functions {
                 }
 
                 if (arr.containsKey("password")) {
-                    password = arr.get("password").val();
+                    password = arr.get("password", t).val();
                 } else {
                     password = null;
                 }
 
                 if (arr.containsKey("runsync")) {
-                    if (!(arr.get("runsync") instanceof CBoolean)) {
+                    if (!(arr.get("runsync", t) instanceof CBoolean)) {
                         throw new ConfigRuntimeException(getName() + " expects a"
                                 + " boolean to be sent as runsync in the fourth"
                                 + " argument", ExceptionType.CastException, t);
                     }
 
-                    async = !((CBoolean) arr.get("runsync")).getBoolean();
+                    async = !((CBoolean) arr.get("runsync", t)).getBoolean();
                 }
             } else {
                 port = 6667;
@@ -662,7 +662,7 @@ public class Functions {
 
             retn.set("nickname", bot.getNickname());
             retn.set("channels", channels, t);
-            retn.set("connected", new CBoolean(bot.isConnected(), t), t);
+            retn.set("connected", CBoolean.get(bot.isConnected()), t);
 
             return retn;
         }

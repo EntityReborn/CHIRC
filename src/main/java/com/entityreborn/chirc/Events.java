@@ -486,7 +486,7 @@ public class Events implements Listener {
             return true;
         }
 
-        public BindableEvent convert(CArray manualObject) {
+        public BindableEvent convert(CArray manualObject, Target t) {
             return null;
         }
 
@@ -516,7 +516,7 @@ public class Events implements Listener {
                 Disconnected msg = (Disconnected) e;
 
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
-                retn.put("wasClean", new CBoolean(msg.wasClean(), Target.UNKNOWN));
+                retn.put("wasClean", CBoolean.get(msg.wasClean()));
             }
 
             return retn;
@@ -557,7 +557,7 @@ public class Events implements Listener {
                 NickInUse msg = (NickInUse) e;
 
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
-                retn.put("nick", new CBoolean(msg.getNick(), Target.UNKNOWN));
+                retn.put("nick", CBoolean.get(msg.getNick()));
             }
 
             return retn;
@@ -577,7 +577,7 @@ public class Events implements Listener {
                 Numeric msg = (Numeric) e;
 
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
-                retn.put("numeric", new CBoolean(msg.getNumeric().getName(), Target.UNKNOWN));
+                retn.put("numeric", new CString(msg.getNumeric().getName(), Target.UNKNOWN));
                 retn.put("numericid", new CInt(msg.getNumeric().getCode(), Target.UNKNOWN));
                 retn.put("args", Construct.GetConstruct(msg.getArgs()));
                 retn.put("message", new CString(msg.getMessage(), Target.UNKNOWN));
@@ -621,7 +621,7 @@ public class Events implements Listener {
                 ConnectionException msg = (ConnectionException) e;
 
                 retn.put("id", new CString(msg.getBot().getID(), Target.UNKNOWN));
-                retn.put("message", new CBoolean(msg.getMessage(), Target.UNKNOWN));
+                retn.put("message", new CString(msg.getMessage(), Target.UNKNOWN));
                 retn.put("exceptionclass", new CString(msg.className(), Target.UNKNOWN));
             }
 
