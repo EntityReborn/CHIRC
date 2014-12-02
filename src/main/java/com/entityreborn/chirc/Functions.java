@@ -825,7 +825,7 @@ public class Functions {
             verbose("CHIRC", "irc_irc2mc_colors:" + flatten(args), t);
 
             String line = args[0].val();
-            String background = "(,(1[0-5]|0?[0-9])?";
+            String background = "(,(1[0-5]|0?[0-9]))?";
             
             line = line.replaceAll("\u00030?1" + background, "§0");
             line = line.replaceAll("\u00030?2" + background, "§1");
