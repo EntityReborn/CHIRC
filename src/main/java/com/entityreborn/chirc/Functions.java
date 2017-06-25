@@ -46,9 +46,9 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.exceptions.CRE.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -62,8 +62,8 @@ import java.util.logging.Logger;
  */
 public class Functions {
     public abstract static class IrcFunc extends AbstractFunction {
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
         public boolean isRestricted() {
@@ -185,10 +185,10 @@ public class Functions {
     @api
     public static class irc_connect extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{
-                ExceptionType.NotFoundException, ExceptionType.IOException,
-                ExceptionType.CastException, ExceptionType.RangeException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{
+                CRENotFoundException.class, CREIOException.class,
+                CRECastException.class, CRERangeException.class};
         }
 
         public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
@@ -205,9 +205,8 @@ public class Functions {
             if (args.length >= 4) {
                 if (!(args[3] instanceof CArray)
                         || !((CArray) args[3]).inAssociativeMode()) {
-                    throw new ConfigRuntimeException(getName() + " expects an"
-                            + " associative array to be sent as the fourth argument",
-                            ExceptionType.CastException, t);
+                    throw new CRECastException(getName() + " expects an"
+                            + " associative array to be sent as the fourth argument", t);
                 }
 
                 CArray arr = (CArray) args[3];
@@ -224,9 +223,9 @@ public class Functions {
                     long iport = Static.getInt(arr.get("port", t), t);
 
                     if (iport < 1 || iport > 65535) {
-                        throw new ConfigRuntimeException(getName() + " expects an"
+                        throw new CRERangeException(getName() + " expects an"
                                 + " integer between 1 and 65535 to be sent as port"
-                                + " in the fourth argument", ExceptionType.RangeException, t);
+                                + " in the fourth argument", t);
                     }
 
                     port = (int) iport;
@@ -242,9 +241,9 @@ public class Functions {
 
                 if (arr.containsKey("runsync")) {
                     if (!(arr.get("runsync", t) instanceof CBoolean)) {
-                        throw new ConfigRuntimeException(getName() + " expects a"
+                        throw new CRECastException(getName() + " expects a"
                                 + " boolean to be sent as runsync in the fourth"
-                                + " argument", ExceptionType.CastException, t);
+                                + " argument", t);
                     }
 
                     async = !((CBoolean) arr.get("runsync", t)).getBoolean();
@@ -309,9 +308,9 @@ public class Functions {
     @api
     public static class irc_join extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{
-                ExceptionType.NotFoundException, ExceptionType.IOException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{
+                CRENotFoundException.class, CREIOException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -347,9 +346,9 @@ public class Functions {
     @api
     public static class irc_part extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{
-                ExceptionType.NotFoundException, ExceptionType.IOException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{
+                CRENotFoundException.class, CREIOException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -385,9 +384,9 @@ public class Functions {
     @api
     public static class irc_quit extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{
-                ExceptionType.NotFoundException, ExceptionType.IOException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{
+                CRENotFoundException.class, CREIOException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -421,9 +420,9 @@ public class Functions {
     @api
     public static class irc_msg extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{
-                ExceptionType.NotFoundException, ExceptionType.IOException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{
+                CRENotFoundException.class, CREIOException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -465,9 +464,9 @@ public class Functions {
     @api
     public static class irc_action extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{
-                ExceptionType.NotFoundException, ExceptionType.IOException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{
+                CRENotFoundException.class, CREIOException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -509,9 +508,9 @@ public class Functions {
     @api
     public static class irc_nick extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{
-                ExceptionType.NotFoundException, ExceptionType.IOException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{
+                CRENotFoundException.class, CREIOException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -543,9 +542,9 @@ public class Functions {
     @api
     public static class irc_channel_info extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{
-                ExceptionType.NotFoundException, ExceptionType.IOException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{
+                CRENotFoundException.class, CREIOException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -558,8 +557,7 @@ public class Functions {
             Channel chan = bot.getChannel(chanName);
 
             if (chan == null) {
-                throw new ConfigRuntimeException("Not joined to that channel!",
-                        ExceptionType.NotFoundException, t);
+                throw new CRENotFoundException("Not joined to that channel!", t);
             }
 
             CArray retn = new CArray(t);
@@ -598,9 +596,9 @@ public class Functions {
     @api
     public static class irc_user_info extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{
-                ExceptionType.NotFoundException, ExceptionType.IOException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{
+                CRENotFoundException.class, CREIOException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -613,8 +611,7 @@ public class Functions {
             User user = bot.getUser(userName);
 
             if (user == null) {
-                throw new ConfigRuntimeException("No idea who that is!",
-                        ExceptionType.NotFoundException, t);
+                throw new CRENotFoundException("No idea who that is!", t);
             }
 
             CArray retn = new CArray(t);
@@ -642,8 +639,8 @@ public class Functions {
     @api
     public static class irc_info extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.NotFoundException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CRENotFoundException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -683,8 +680,8 @@ public class Functions {
     @api
     public static class irc_color extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREFormatException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -697,7 +694,7 @@ public class Functions {
             try {
                 color = Colors.valueOf(name.replace(" ", ""));
             } catch (IllegalArgumentException e) {
-                throw new ConfigRuntimeException("Bad foreground color name", ExceptionType.FormatException, t);
+                throw new CREFormatException("Bad foreground color name", t);
             }
 
             if (args.length == 2) {
@@ -706,7 +703,7 @@ public class Functions {
 
                     color.setBackground(background.replace(" ", ""));
                 } catch (IllegalArgumentException e) {
-                    throw new ConfigRuntimeException("Bad background color name", ExceptionType.FormatException, t);
+                    throw new CREFormatException("Bad background color name", t);
                 }
             }
 
@@ -730,8 +727,8 @@ public class Functions {
     @api
     public static class irc_style extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{CREFormatException.class};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -743,7 +740,7 @@ public class Functions {
             try {
                 style = Styles.valueOf(name.toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new ConfigRuntimeException("Bad style name", ExceptionType.FormatException, t);
+                throw new CREFormatException("Bad style name", t);
             }
 
             return new CString(style.toString(), t);
@@ -767,8 +764,8 @@ public class Functions {
     @api
     public static class irc_mc2irc_colors extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -816,8 +813,8 @@ public class Functions {
     @api
     public static class irc_irc2mc_colors extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -868,8 +865,8 @@ public class Functions {
     @api
     public static class irc_user_meta extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -882,8 +879,7 @@ public class Functions {
             User user = bot.getUser(userName);
 
             if (user == null) {
-                throw new ConfigRuntimeException("No idea who that is!",
-                        ExceptionType.NotFoundException, t);
+                throw new CRENotFoundException("No idea who that is!", t);
             }
             
             CArray retn = new CArray(t);
@@ -919,8 +915,8 @@ public class Functions {
     @api
     public static class irc_channel_meta extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -933,8 +929,7 @@ public class Functions {
             Channel channel = bot.getChannel(chanName);
 
             if (channel == null) {
-                throw new ConfigRuntimeException("No clue about that channel!",
-                        ExceptionType.NotFoundException, t);
+                throw new CRENotFoundException("No clue about that channel!", t);
             }
             
             CArray retn = new CArray(t);
@@ -970,8 +965,8 @@ public class Functions {
     @api
     public static class irc_set_user_meta extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -984,8 +979,7 @@ public class Functions {
             User user = bot.getUser(userName);
 
             if (user == null) {
-                throw new ConfigRuntimeException("No idea who that user is!",
-                        ExceptionType.NotFoundException, t);
+                throw new CRENotFoundException("No idea who that user is!", t);
             }
             
             String key = args[2].val();
@@ -1012,8 +1006,8 @@ public class Functions {
     @api
     public static class irc_set_channel_meta extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -1026,8 +1020,7 @@ public class Functions {
             Channel channel = bot.getChannel(chanName);
 
             if (channel == null) {
-                throw new ConfigRuntimeException("No idea about that channel!",
-                        ExceptionType.NotFoundException, t);
+                throw new CRENotFoundException("No idea about that channel!", t);
             }
             
             String key = args[2].val();
@@ -1054,8 +1047,8 @@ public class Functions {
     @api
     public static class irc_del_user_meta extends IrcFunc {
         @Override
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Class<? extends CREThrowable>[] thrown() {
+            return new Class[]{};
         }
 
         public Construct exec(Target t, Environment environment,
@@ -1068,8 +1061,7 @@ public class Functions {
             User user = bot.getUser(userName);
 
             if (user == null) {
-                throw new ConfigRuntimeException("No idea who that user is!",
-                        ExceptionType.NotFoundException, t);
+                throw new CRENotFoundException("No idea who that user is!", t);
             }
             
             String key = args[2].val();
