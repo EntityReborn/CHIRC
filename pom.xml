@@ -4,7 +4,7 @@
 
     <groupId>com.entityreborn</groupId>
     <artifactId>chirc</artifactId>
-    <version>0.0.0</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
 
     <name>CHIRC</name>
@@ -57,7 +57,7 @@
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>commandhelper</artifactId>
-            <version>3.3.2-SNAPSHOT</version>
+            <version>3.3.4-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
     </dependencies>

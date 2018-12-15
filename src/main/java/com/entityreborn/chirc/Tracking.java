@@ -27,12 +27,13 @@ import com.entityreborn.socbot.SocBot;
 import com.entityreborn.socbot.eventsystem.EventManager;
 import com.laytonsmith.PureUtilities.SimpleVersion;
 import com.laytonsmith.PureUtilities.Version;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CRE.CREException;
 import com.laytonsmith.core.exceptions.CRE.CRENotFoundException;
 import com.laytonsmith.core.extensions.AbstractExtension;
 import com.laytonsmith.core.extensions.MSExtension;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,7 +65,7 @@ public class Tracking extends AbstractExtension {
                 
     }
     
-    public static String flatten(Construct... args) {
+    public static String flatten(Mixed... args) {
         String retn = "";
         
         for (int i = 0; i < args.length; i++) {
