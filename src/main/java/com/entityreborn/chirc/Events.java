@@ -43,7 +43,7 @@ import com.entityreborn.socbot.eventsystem.EventHandler;
 import com.entityreborn.socbot.eventsystem.Listener;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
@@ -57,6 +57,8 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -482,7 +484,7 @@ public class Events implements Listener {
             return ""; //TBA
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             return true;
         }
 
@@ -494,12 +496,12 @@ public class Events implements Listener {
             return Driver.EXTENSION;
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) throws ConfigRuntimeException {
+        public boolean modifyEvent(String key, Mixed value, BindableEvent event) throws ConfigRuntimeException {
             return false;
         }
 
         public Version since() {
-            return CHVersion.V3_3_1;
+            return MSVersion.V3_3_1;
         }
     }
 
@@ -509,8 +511,8 @@ public class Events implements Listener {
             return "irc_disconnected";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof Disconnected) {
                 Disconnected msg = (Disconnected) e;
@@ -529,8 +531,8 @@ public class Events implements Listener {
             return "irc_nick_changed";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof Nick) {
                 Nick msg = (Nick) e;
@@ -550,8 +552,8 @@ public class Events implements Listener {
             return "irc_nick_in_use";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof NickInUse) {
                 NickInUse msg = (NickInUse) e;
@@ -570,8 +572,8 @@ public class Events implements Listener {
             return "irc_numeric";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof Numeric) {
                 Numeric msg = (Numeric) e;
@@ -593,8 +595,8 @@ public class Events implements Listener {
             return "irc_connected";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof Connected) {
                 Connected msg = (Connected) e;
@@ -614,8 +616,8 @@ public class Events implements Listener {
             return "irc_connection_exception";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof ConnectionException) {
                 ConnectionException msg = (ConnectionException) e;
@@ -635,8 +637,8 @@ public class Events implements Listener {
             return "irc_msg";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof PrivMsg) {
                 PrivMsg msg = (PrivMsg) e;
@@ -657,8 +659,8 @@ public class Events implements Listener {
             return "irc_error";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof Error) {
                 Error msg = (Error) e;
@@ -677,8 +679,8 @@ public class Events implements Listener {
             return "irc_recv_raw";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof RecvLine) {
                 RecvLine msg = (RecvLine) e;
@@ -697,8 +699,8 @@ public class Events implements Listener {
             return "irc_action";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof Action) {
                 Action msg = (Action) e;
@@ -719,8 +721,8 @@ public class Events implements Listener {
             return "irc_welcomed";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof Welcome) {
                 Welcome msg = (Welcome) e;
@@ -737,8 +739,8 @@ public class Events implements Listener {
             return "irc_joined";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof Join) {
                 Join msg = (Join) e;
@@ -758,8 +760,8 @@ public class Events implements Listener {
             return "irc_quit";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof Quit) {
                 Quit msg = (Quit) e;
@@ -779,8 +781,8 @@ public class Events implements Listener {
             return "irc_parted";
         }
 
-        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-            Map<String, Construct> retn = new HashMap<String, Construct>();
+        public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+            Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
             if (e instanceof Part) {
                 Part msg = (Part) e;

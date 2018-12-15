@@ -35,13 +35,12 @@ import com.laytonsmith.PureUtilities.Common.StringUtils;
 import com.laytonsmith.PureUtilities.Version;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.MSVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.Driver;
@@ -49,6 +48,8 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.CRE.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.AbstractFunction;
+import com.laytonsmith.core.natives.interfaces.Mixed;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -75,14 +76,13 @@ public class Functions {
         }
 
         public Version since() {
-            return CHVersion.V3_3_1;
+            return MSVersion.V3_3_1;
         }
     }
 
     @api
     public static class irc_create extends IrcFunc {
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_create:" + flatten(args), t);
 
             SocBot bot = Tracking.create(args[0].val());
@@ -106,8 +106,7 @@ public class Functions {
 
     @api
     public static class irc_strip_color extends IrcFunc {
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_strip_color:" + flatten(args), t);
 
             String out = Colors.removeAll(args[0].val());
@@ -131,8 +130,7 @@ public class Functions {
 
     @api
     public static class irc_send_raw extends IrcFunc {
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_send_raw:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -159,8 +157,7 @@ public class Functions {
 
     @api
     public static class irc_destroy extends IrcFunc {
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_destroy:" + flatten(args), t);
 
             Tracking.destroy(args[0].val(), t);
@@ -191,7 +188,7 @@ public class Functions {
                 CRECastException.class, CRERangeException.class};
         }
 
-        public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(final Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_connect:" + flatten(args), t);
 
             final SocBot bot = Tracking.get(args[0].val(), t);
@@ -313,8 +310,7 @@ public class Functions {
                 CRENotFoundException.class, CREIOException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_join:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -351,8 +347,7 @@ public class Functions {
                 CRENotFoundException.class, CREIOException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_part:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -389,8 +384,7 @@ public class Functions {
                 CRENotFoundException.class, CREIOException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_quit:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -425,8 +419,7 @@ public class Functions {
                 CRENotFoundException.class, CREIOException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_msg:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -469,8 +462,7 @@ public class Functions {
                 CRENotFoundException.class, CREIOException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_action:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -513,8 +505,7 @@ public class Functions {
                 CRENotFoundException.class, CREIOException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_nick:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -547,8 +538,7 @@ public class Functions {
                 CRENotFoundException.class, CREIOException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_nick:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -601,8 +591,7 @@ public class Functions {
                 CRENotFoundException.class, CREIOException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_nick:" + flatten(args), t);
 
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -643,8 +632,7 @@ public class Functions {
             return new Class[]{CRENotFoundException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_info:" + flatten(args), t);
 
             SocBot bot = Tracking.get(args[0].val(), t);
@@ -684,8 +672,7 @@ public class Functions {
             return new Class[]{CREFormatException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_color:" + flatten(args), t);
 
             String name = args[0].val().toUpperCase();
@@ -731,8 +718,7 @@ public class Functions {
             return new Class[]{CREFormatException.class};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_style:" + flatten(args), t);
 
             String name = args[0].val();
@@ -768,8 +754,7 @@ public class Functions {
             return new Class[]{};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_mc2irc_colors:" + flatten(args), t);
 
             String line = args[0].val();
@@ -817,8 +802,7 @@ public class Functions {
             return new Class[]{};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_irc2mc_colors:" + flatten(args), t);
 
             String line = args[0].val();
@@ -869,8 +853,7 @@ public class Functions {
             return new Class[]{};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_user_meta:" + flatten(args), t);
             
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -887,8 +870,8 @@ public class Functions {
             for (Map.Entry<String, Object> entry : user.getMetaData().entrySet()) {
                 String key = entry.getKey();
                 
-                if (entry.getValue() instanceof Construct) {
-                    Construct value = (Construct)entry.getValue();
+                if (entry.getValue() instanceof Mixed) {
+                    Mixed value = (Mixed)entry.getValue();
                     retn.set(key, value, t);
                 } else {
                     String value = entry.getValue().toString();
@@ -919,8 +902,7 @@ public class Functions {
             return new Class[]{};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_channel_meta:" + flatten(args), t);
             
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -937,8 +919,8 @@ public class Functions {
             for (Map.Entry<String, Object> entry : channel.getMetaData().entrySet()) {
                 String key = entry.getKey();
                 
-                if (entry.getValue() instanceof Construct) {
-                    Construct value = (Construct)entry.getValue();
+                if (entry.getValue() instanceof Mixed) {
+                    Mixed value = (Mixed)entry.getValue();
                     retn.set(key, value, t);
                 } else {
                     String value = entry.getValue().toString();
@@ -969,8 +951,7 @@ public class Functions {
             return new Class[]{};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_set_user_meta:" + flatten(args), t);
             
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -983,7 +964,7 @@ public class Functions {
             }
             
             String key = args[2].val();
-            Construct value = args[3];
+            Mixed value = args[3];
             
             user.setMetaData(key, value);
             
@@ -1010,8 +991,7 @@ public class Functions {
             return new Class[]{};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_set_channel_meta:" + flatten(args), t);
             
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -1024,7 +1004,7 @@ public class Functions {
             }
             
             String key = args[2].val();
-            Construct value = args[3];
+            Mixed value = args[3];
             
             channel.setMetaData(key, value);
             
@@ -1051,8 +1031,7 @@ public class Functions {
             return new Class[]{};
         }
 
-        public Construct exec(Target t, Environment environment,
-                Construct... args) throws ConfigRuntimeException {
+        public Mixed exec(Target t, Environment environment, Mixed... args) throws ConfigRuntimeException {
             verbose("CHIRC", "irc_del_user_meta:" + flatten(args), t);
             
             SocBot bot = Tracking.getConnected(args[0].val(), t);
@@ -1068,8 +1047,8 @@ public class Functions {
             
             Object retn = user.remMetaData(key);
             
-            if (retn instanceof Construct) {
-                return (Construct)retn;
+            if (retn instanceof Mixed) {
+                return (Mixed)retn;
             } else {
                 return new CString(retn.toString(), t);
             }
