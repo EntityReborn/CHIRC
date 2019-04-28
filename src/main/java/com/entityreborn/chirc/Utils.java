@@ -24,7 +24,7 @@
 
 package com.entityreborn.chirc;
 
-import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.MSLog;
 import com.laytonsmith.core.constructs.Target;
 
 /**
@@ -54,11 +54,11 @@ public class Utils {
     }
     
     public static void log(String tag, String line, Target targ) {
-        CHLog.GetLogger().i(CHLog.Tags.EXTENSIONS, "[" + tag + "] " + line, targ);
+        MSLog.GetLogger().i(MSLog.Tags.EXTENSIONS, "[" + tag + "] " + line, targ);
     }
     
     public static void verbose(String tag, String line, Target targ) {
-        CHLog.GetLogger().v(CHLog.Tags.EXTENSIONS, "[" + tag + "] " + line, targ);
+        MSLog.GetLogger().v(MSLog.Tags.EXTENSIONS, "[" + tag + "] " + line, targ);
     }
     
 }
