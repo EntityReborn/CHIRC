@@ -480,10 +480,6 @@ public class Events implements Listener {
     }
 
     private abstract static class IrcEvent extends AbstractEvent {
-        public String docs() {
-            return ""; //TBA
-        }
-
         public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             return true;
         }
@@ -511,6 +507,15 @@ public class Events implements Listener {
             return "irc_disconnected";
         }
 
+        public String docs() {
+            return "{}"
+                    + " Fires when disconnected from host. If irc_destroy or irc_quit is used, wasClean will be true."
+                    + " It will be false if a timeout or other error occurred."
+                    + "{id | wasClean: Whether bot disconnected without error}"
+                    + "{}"
+                    + "{}";
+        }
+
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
@@ -529,6 +534,14 @@ public class Events implements Listener {
     public static class irc_nick extends IrcEvent {
         public String getName() {
             return "irc_nick_changed";
+        }
+
+        public String docs() {
+            return "{}"
+                    + " Fires when user has their nickname changed."
+                    + "{id | oldnick: The previous nickname | newnick: The now current nickname}"
+                    + "{}"
+                    + "{}";
         }
 
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
@@ -552,6 +565,14 @@ public class Events implements Listener {
             return "irc_nick_in_use";
         }
 
+        public String docs() {
+            return "{}"
+                    + " Fires when an attempt at changing nickname fails because the nick is in use."
+                    + "{id | nick: The attempted nickname}"
+                    + "{}"
+                    + "{}";
+        }
+
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
@@ -570,6 +591,14 @@ public class Events implements Listener {
     public static class irc_numeric extends IrcEvent {
         public String getName() {
             return "irc_numeric";
+        }
+
+        public String docs() {
+            return "{}"
+                    + " Fires when certain numeric packets are received. (See RFC 2812)"
+                    + "{id | numeric | numericid | args | message }"
+                    + "{}"
+                    + "{}";
         }
 
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
@@ -595,6 +624,15 @@ public class Events implements Listener {
             return "irc_connected";
         }
 
+        public String docs() {
+            return "{}"
+                    + " Fires when connected to host. Bot is about to attempt signin."
+                    + " The bot isn't in the server yet. (advanced use only!)"
+                    + "{id | server: The host connected to | port: The port connected to}"
+                    + "{}"
+                    + "{}";
+        }
+
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
@@ -616,6 +654,14 @@ public class Events implements Listener {
             return "irc_connection_exception";
         }
 
+        public String docs() {
+            return "{}"
+                    + " Fires when connection fails. Triggers reconnect."
+                    + "{id | exceptionclass: The exception's simple class name | message}"
+                    + "{}"
+                    + "{}";
+        }
+
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
@@ -635,6 +681,14 @@ public class Events implements Listener {
     public static class irc_msg extends IrcEvent {
         public String getName() {
             return "irc_msg";
+        }
+
+        public String docs() {
+            return "{}"
+                    + " Fires when bot sends or receives a private message."
+                    + "{id | who: The sender | target: The receiving channel or user | message }"
+                    + "{}"
+                    + "{}";
         }
 
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
@@ -659,6 +713,14 @@ public class Events implements Listener {
             return "irc_error";
         }
 
+        public String docs() {
+            return "{}"
+                    + " Fires when error packet is received."
+                    + "{id | message }"
+                    + "{}"
+                    + "{}";
+        }
+
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
@@ -679,6 +741,15 @@ public class Events implements Listener {
             return "irc_recv_raw";
         }
 
+        public String docs() {
+            return "{}"
+                    + " Fires when a packet is received. This is fired before any tracking is done by the internal"
+                    + " library, so be aware of what you're doing!"
+                    + "{id | line: The raw packet data }"
+                    + "{}"
+                    + "{}";
+        }
+
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
@@ -697,6 +768,14 @@ public class Events implements Listener {
     public static class irc_action extends IrcEvent {
         public String getName() {
             return "irc_action";
+        }
+
+        public String docs() {
+            return "{}"
+                    + " Fires when an action CTCP message is received. (/me)"
+                    + "{id | who | target: The receiving channel or user  | message }"
+                    + "{}"
+                    + "{}";
         }
 
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
@@ -721,6 +800,14 @@ public class Events implements Listener {
             return "irc_welcomed";
         }
 
+        public String docs() {
+            return "{}"
+                    + " Fires when a welcome reply is received after the bot successfully signed in."
+                    + "{id}"
+                    + "{}"
+                    + "{}";
+        }
+
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
@@ -737,6 +824,14 @@ public class Events implements Listener {
     public static class irc_joined extends IrcEvent {
         public String getName() {
             return "irc_joined";
+        }
+
+        public String docs() {
+            return "{}"
+                    + " Fires when a user joins a channel. User could be self when using irc_join()."
+                    + "{id | who: The user that joined | channel: The channel that was joined }"
+                    + "{}"
+                    + "{}";
         }
 
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
@@ -760,6 +855,14 @@ public class Events implements Listener {
             return "irc_quit";
         }
 
+        public String docs() {
+            return "{}"
+                    + " Fires when a user quits. User could be self when using irc_quit()."
+                    + "{id | who: The user that quit | message }"
+                    + "{}"
+                    + "{}";
+        }
+
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
             Map<String, Mixed> retn = new HashMap<String, Mixed>();
 
@@ -779,6 +882,14 @@ public class Events implements Listener {
     public static class irc_parted extends IrcEvent {
         public String getName() {
             return "irc_parted";
+        }
+
+        public String docs() {
+            return "{}"
+                    + " Fires when a user leaves a channel. User could be self when using irc_part()."
+                    + "{id | who: The user that left | channel: The channel that was left }"
+                    + "{}"
+                    + "{}";
         }
 
         public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
